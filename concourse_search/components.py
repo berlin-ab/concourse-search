@@ -8,7 +8,8 @@ from concourse_search.domain import (
 
 
 from concourse_search.concourse import (
-    ConcourseSearch
+    ConcourseSearch,
+    Fly,
 )
 
 
@@ -85,8 +86,14 @@ class Components():
         if self.debug is True:
             print(message)
 
+    def fly(self):
+        return Fly()
+
     def concourse_search(self):
-        return ConcourseSearch(logger=self.logger)
+        return ConcourseSearch(
+            logger=self.logger,
+            fly=self.fly()
+        )
 
     def find_failures(self):
         return FindFailuresCommand(

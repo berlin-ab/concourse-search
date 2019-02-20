@@ -43,30 +43,56 @@ class Response():
         return self._logfile
 
     
+class FlyTarget():
+    def __init__(self, url):
+        self._url = url
+
+    def url(self):
+        return self._url
+    
+    
+class Fly():
+    def targets(self):
+        return [
+            line.decode('utf-8')
+            for line
+            in subprocess.check_output(["fly", "targets"]).splitlines(True)
+        ]
+
+    def target_matching(self, target):
+        for line in self.targets():
+            if target in line:
+                return self._parse_target_line(line)
+
+        raise RuntimeError("could not find base url for target: {target}".format(target=target))
+
+    @staticmethod
+    def _parse_target_line(line):
+        for item in line.split(" "):
+            if item.startswith("https"):
+                return FlyTarget(url=item)
+    
+    
 class ConcourseBaseUrlFinder():
-    def __init__(self):
+    def __init__(self, fly):
         self._cache = {}
+        self._fly = fly
         
     def find(self, target):
         return self._cache.get(target, self._fetch(target))
 
     def _fetch(self, target):
-        for line in subprocess.check_output(["fly", "targets"]).splitlines(True):
-            decoded_line=line.decode('utf-8')
-            if target in decoded_line:
-                for item in decoded_line.split(" "):
-                    if item.startswith("https"):
-                        self._cache[target] = item
-                        return item
-
-        raise RuntimeError("could not find base url for target: {target}".format(target=target))
+        fly_target = self._fly.target_matching(target)
+        
+        self._cache[target] = fly_target.url()
+        return fly_target.url()
 
     
 class ConcourseSearch():
 
-    def __init__(self, logger=default_logger):
+    def __init__(self, fly, logger=default_logger):
         self.logger = logger
-        self.concourse_base_url_finder = ConcourseBaseUrlFinder()
+        self.concourse_base_url_finder = ConcourseBaseUrlFinder(fly=fly)
 
     def find_builds(self, target, pipeline, job, starting_build_number, limit=100):
         result = []

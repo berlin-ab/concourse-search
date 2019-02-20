@@ -3,12 +3,16 @@ import unittest
 
 from concourse_search.concourse import (
     ConcourseSearch,
+    Fly,
 )
 
 
 class ConcourseIntegrationTest(unittest.TestCase):
+    def setUp(self):
+        self.concourse_search = ConcourseSearch(fly=Fly())
+        
     def test_it_returns_lines_from_a_concourse_build(self):
-        lines = ConcourseSearch().find(
+        lines = self.concourse_search.find(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -26,14 +30,14 @@ class ConcourseIntegrationTest(unittest.TestCase):
         self.assertEqual(line.build(), 1)
 
     def test_it_returns_line_information_after_caching(self):
-        ConcourseSearch().find(
+        self.concourse_search.find(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
             build=1
         )
         
-        lines = ConcourseSearch().find(
+        lines = self.concourse_search.find(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -47,7 +51,7 @@ class ConcourseIntegrationTest(unittest.TestCase):
         self.assertEqual(line.build(), 1)
         
     def test_it_stores_download_in_a_local_cache(self):
-        lines = ConcourseSearch().find(
+        lines = self.concourse_search.find(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -60,7 +64,7 @@ class ConcourseIntegrationTest(unittest.TestCase):
             self.assertIn("real	60m28.873s\r\n", file.readlines())
 
     def test_it_returns_a_url_for_the_build_the_line_was_extracted_from(self):
-        lines = ConcourseSearch().find(
+        lines = self.concourse_search.find(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -72,7 +76,7 @@ class ConcourseIntegrationTest(unittest.TestCase):
         self.assertEqual("https://prod.ci.gpdb.pivotal.io/teams/main/pipelines/gpdb_master/jobs/icw_planner_centos6/builds/1", line.url())
 
     def test_it_returns_all_builds(self):
-        builds = ConcourseSearch().find_builds(
+        builds = self.concourse_search.find_builds(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -83,7 +87,7 @@ class ConcourseIntegrationTest(unittest.TestCase):
         self.assertEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1], build_numbers)
 
     def test_it_limits_the_number_of_returned_builds(self):
-        builds = ConcourseSearch().find_builds(
+        builds = self.concourse_search.find_builds(
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
