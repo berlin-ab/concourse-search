@@ -34,11 +34,83 @@ def find_failures_arguments(subcommand='find-failures',
     return arguments
 
 
-class ConcourseSearchTest(unittest.TestCase):
+def failing_builds_arguments(subcommand='failing-builds',
+                             target='some-target',
+                             pipeline='some-pipeline',
+                             job='some-job',
+                             starting_build='111',
+):
+    arguments = []
+
+    if subcommand: arguments.append(subcommand)
+    if target: arguments.extend(["--target", target])
+    if pipeline: arguments.extend(["--pipeline", pipeline])
+    if job: arguments.extend(['--job', job])
+    if starting_build: arguments.extend(['--starting-build', starting_build])
+
+    return arguments
+
+
+class FailingBuildsCliTest(unittest.TestCase):
+
+    def test_parse_args_determines_if_subcommand_is_legit(self):
+        parsed_args = parse_args(failing_builds_arguments(subcommand="failing-builds"))
+        self.assertEqual(parsed_args.chosen_command().name(), 'failing-builds')
+
+    def test_parse_args_takes_target_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(target='this-target'))
+        self.assertEqual(parsed_args.target(), 'this-target')
+
+    def test_parsed_args_requires_target(self):
+        def action():
+            parse_args(failing_builds_arguments(target=None))
+
+        self.assertRaises(SystemExit, action)
+
+    def test_parse_args_takes_pipeline_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(pipeline='this-pipeline'))
+        self.assertEqual(parsed_args.pipeline(), 'this-pipeline')
+
+    def test_parsed_args_requires_pipeline(self):
+        def action():
+            parse_args(failing_builds_arguments(pipeline=None))
+
+        self.assertRaises(SystemExit, action)
+
+    def test_parse_args_takes_job_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(job='this-job'))
+        self.assertEqual(parsed_args.job(), 'this-job')
+
+    def test_parsed_args_requires_job(self):
+        def action():
+            parse_args(failing_builds_arguments(job=None))
+
+        self.assertRaises(SystemExit, action)
+
+    def test_parse_args_takes_starting_build_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(starting_build='999'))
+        self.assertEqual(parsed_args.starting_build(), 999)
+
+    def test_parsed_args_requires_starting_build(self):
+        def action():
+            parse_args(failing_builds_arguments(starting_build=None))
+
+        self.assertRaises(SystemExit, action)
+
+    def test_it_takes_a_verbose_argument(self):
+        arguments = []
+        arguments.append("--verbose")
+        arguments.extend(failing_builds_arguments())
+        
+        parsed_args = parse_args(arguments)
+        self.assertEqual(parsed_args.verbose(), True)
+        
+
+class FindFailuresCliTest(unittest.TestCase):
     def test_parse_args_determines_if_subcommand_is_legit(self):
         parsed_args = parse_args(find_failures_arguments(subcommand="find-failures"))
         self.assertEqual(parsed_args.chosen_command().name(), 'find-failures')
-        
+
     def test_parsed_args_includes_target(self):
         parsed_args = parse_args(find_failures_arguments(target="some/target"))
         command = parsed_args.chosen_command()
@@ -75,7 +147,6 @@ class ConcourseSearchTest(unittest.TestCase):
         command = parsed_args.chosen_command()
         self.assertEqual(123, command.build())
 
-        
     def test_parsed_args_includes_search(self):
         parsed_args = parse_args(find_failures_arguments(search="some/search"))
         command = parsed_args.chosen_command()

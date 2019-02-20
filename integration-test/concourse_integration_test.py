@@ -70,3 +70,27 @@ class ConcourseIntegrationTest(unittest.TestCase):
         line = lines[0]
 
         self.assertEqual("https://prod.ci.gpdb.pivotal.io/teams/main/pipelines/gpdb_master/jobs/icw_planner_centos6/builds/1", line.url())
+
+    def test_it_returns_all_builds(self):
+        builds = ConcourseSearch().find_builds(
+            target="gpdb-prod",
+            pipeline="gpdb_master",
+            job="icw_planner_centos6",
+            starting_build_number=10
+        )
+
+        build_numbers = [build.number() for build in builds]
+        self.assertEqual([10, 9, 8, 7, 6, 5, 4, 3, 2, 1], build_numbers)
+
+    def test_it_limits_the_number_of_returned_builds(self):
+        builds = ConcourseSearch().find_builds(
+            target="gpdb-prod",
+            pipeline="gpdb_master",
+            job="icw_planner_centos6",
+            starting_build_number=10,
+            limit=2,
+        )
+
+        build_numbers = [build.number() for build in builds]
+        self.assertEqual([10, 9], build_numbers)
+

@@ -2,7 +2,10 @@ import subprocess
 import os
 
 
-from concourse_search.domain import Line
+from concourse_search.domain import (
+    Line,
+    Build,
+)
 
 
 def transform_lines(lines, target, pipeline, job, build, base_url):
@@ -24,32 +27,48 @@ def default_logger(message):
     pass
 
 
+class Response():
+    def __init__(self, raw_lines, was_success):
+        self._raw_lines = raw_lines
+        self._was_success = was_success
+
+    def raw_lines(self):
+        return self._raw_lines
+
+    def was_success(self):
+        return self._was_success
+        
+
 class ConcourseSearch():
 
     def __init__(self, logger=default_logger):
         self.logger = logger
-                
-    def find(self, target, pipeline, job, build):
-        self.logger("Searching for build number: {build}".format(build=build))
+
+    def find_builds(self, target, pipeline, job, starting_build_number, limit=100):
+        result = []
         base_url = self._get_base_url(target)
         
-        if not os.path.exists("/tmp/.concourse-search"):
-            os.makedirs("/tmp/.concourse-search")
+        while (starting_build_number > 0 and limit > 0):
+            response = self._fetch(target, pipeline, job, starting_build_number)
+            result.append(
+                Build(
+                    number=starting_build_number,
+                    failing=(not response.was_success()),
+                    pipeline=pipeline,
+                    job=job,
+                    base_url=base_url,
+                )
+            )
+            starting_build_number = starting_build_number - 1
+            limit = limit - 1
 
-        logfile_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}.log".format(
-            target=target,
-            pipeline=pipeline.replace("_", "-"),
-            job=job.replace("_", "-").replace("/", "-"),
-            build=build,
-        )
+        return result
+    
+    def find(self, target, pipeline, job, build):
+        self.logger("Searching for build number: {build}".format(build=build))
 
-        if not os.path.exists(logfile_path):
-            raw_lines = self._fetch(target, pipeline, job, build)
-            with open(logfile_path, "wb") as logfile:
-                logfile.write(raw_lines)
-        else:
-            with open(logfile_path, "rb") as file:
-                raw_lines = file.read()
+        base_url = self._get_base_url(target)
+        raw_lines = self._fetch(target, pipeline, job, build).raw_lines()
 
         return transform_lines(
             lines=raw_lines.splitlines(True),
@@ -70,7 +89,48 @@ class ConcourseSearch():
 
         raise RuntimeError("could not find base url for target: {target}".format(target=target))
 
+    
     def _fetch(self, target, pipeline, job, build):
+        if not os.path.exists("/tmp/.concourse-search"):
+            os.makedirs("/tmp/.concourse-search")
+
+        logfile_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}.log".format(
+            target=target,
+            pipeline=pipeline.replace("_", "-"),
+            job=job.replace("_", "-").replace("/", "-"),
+            build=build,
+        )
+        success_file_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}-was-success.log".format(
+            target=target,
+            pipeline=pipeline.replace("_", "-"),
+            job=job.replace("_", "-").replace("/", "-"),
+            build=build,
+        )
+
+        if not os.path.exists(logfile_path):
+            response = self._do_fetch(target, pipeline, job, build)
+            
+            with open(logfile_path, "wb") as logfile:
+                logfile.write(response.raw_lines())
+
+            if response.was_success():
+                with open(success_file_path, "w") as logfile:
+                    logfile.write(u"true")
+
+            return response
+        else:
+            with open(logfile_path, "rb") as file:
+                raw_lines = file.read()
+
+            was_success =  os.path.exists(success_file_path)
+
+            return Response(
+                raw_lines=raw_lines,
+                was_success=was_success,
+            )
+
+
+    def _do_fetch(self, target, pipeline, job, build):
         self.logger("Searching concourse for build number: {build}".format(
             build=build
         ))
@@ -84,14 +144,21 @@ class ConcourseSearch():
         ]
 
         raw_lines = None
+        was_success = False
 
         try:
             raw_lines = subprocess.check_output(
                 full_command
             )
+            was_success = True
+        
         except subprocess.CalledProcessError as error:
             raw_lines = error.output
 
+        return Response(
+            raw_lines=raw_lines,
+            was_success=was_success,
+        )
 
-        return raw_lines
+
         

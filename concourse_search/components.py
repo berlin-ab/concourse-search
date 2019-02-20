@@ -3,12 +3,39 @@ import re
 
 from concourse_search.domain import (
     FindFailuresCommand,
+    FailingBuildsCommand,
 )
 
 
 from concourse_search.concourse import (
     ConcourseSearch
 )
+
+
+class FailingBuildsArguments():
+    def __init__(self, arguments):
+        self._arguments = arguments
+
+    def name(self):
+        return 'failing-builds'
+
+    def target(self):
+        return self._arguments.target
+
+    def pipeline(self):
+        return self._arguments.pipeline
+
+    def job(self):
+        return self._arguments.job
+
+    def starting_build(self):
+        return self._arguments.starting_build
+    
+    def chosen_command(self):
+        return self
+
+    def verbose(self):
+        return self._arguments.verbose
 
 
 class FindFailuresArguments():
@@ -42,7 +69,7 @@ class FindFailuresArguments():
     def chosen_command(self):
         return self
 
-
+    
 class Components():
     def __init__(self, stdout, debug=False):
         self._stdout = stdout
@@ -60,6 +87,11 @@ class Components():
 
     def find_failures(self):
         return FindFailuresCommand(
+            concourse_search=self.concourse_search()
+        )
+
+    def failing_builds(self):
+        return FailingBuildsCommand(
             concourse_search=self.concourse_search()
         )
 

@@ -34,6 +34,28 @@ class Line():
             build=self.build()
         )
 
+
+class Build():
+    def __init__(self, number, failing, pipeline, job, base_url):
+        self._number = number
+        self._failing = failing
+        self._pipeline = pipeline
+        self._job = job
+        self._base_url = base_url
+
+    def number(self):
+        return self._number
+
+    def is_failing(self):
+        return self._failing
+
+    def url(self):
+        return u"{base_url}/teams/main/pipelines/{pipeline}/jobs/{job}/builds/{build}".format(
+            base_url=self._base_url,
+            pipeline=self._pipeline,
+            job=self._job,
+            build=self.number()
+        )
     
 class FailuresSet():
 
@@ -50,6 +72,19 @@ class FailuresSet():
 
     def all(self):
         return self._storage.values()
+
+
+class FailingBuildsCommand():
+    def __init__(self, concourse_search):
+        self._concourse_search = concourse_search
+    
+    def find(self, target, pipeline, job, starting_build_number):
+        return [
+            build
+            for build
+            in self._concourse_search.find_builds(target, pipeline, job, starting_build_number)
+            if build.is_failing()
+        ]
 
     
 class FindFailuresCommand():
