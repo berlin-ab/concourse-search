@@ -1,7 +1,16 @@
 import sys
 import re
 import argparse
-import subprocess
+
+
+from concourse_search.domain import (
+    FindFailuresCommand,
+)
+
+
+from concourse_search.concourse import (
+    ConcourseSearch
+)
 
 
 class FindFailuresArguments():
@@ -24,7 +33,7 @@ class FindFailuresArguments():
         return self._arguments.build
 
     def search(self):
-        return self._arguments.search
+        return re.compile(self._arguments.search)
 
     def chosen_command(self):
         return self
@@ -44,55 +53,6 @@ def parse_args(arguments):
     return FindFailuresArguments(args)
 
 
-class FindMessageCommand():
-    def find(self, target, job, build):
-        full_command = [
-            "fly",
-            "--target", str(target),
-            "watch",
-            "--job", str(job),
-            "--build", str(build)
-        ]
-
-        try:
-            return subprocess.check_output(
-                full_command
-            ).splitlines(True)
-        except subprocess.CalledProcessError as error:
-            return error.output.splitlines(True)
-
-
-def do_search(search, line):
-    return search.search(line.message().decode('utf-8'))
-
-
-class Line():
-    def __init__(self, message):
-        self._message = message
-
-    def message(self):
-        return self._message
-
-    
-class FindFailuresCommand():
-    def __init__(self, find_message_command):
-        self._find_message_command = find_message_command
-        
-    def find(self, target, build, job, search):
-        results = []
-        
-        for line in self._find_message_command.find(
-                  target=target,
-                  build=build,
-                  job=job
-              ):
-
-            if do_search(search, line):
-                results.append(line)
-        
-        return results
-                
-    
 class Components():
     def __init__(self, stdout):
         self._stdout = stdout
@@ -101,7 +61,7 @@ class Components():
         return self._stdout
 
     def find_message_command(self):
-        return FindMessageCommand()
+        return ConcourseSearch()
         
         
 def find_failures_runner(components, arguments):
@@ -117,7 +77,7 @@ def find_failures_runner(components, arguments):
         job=arguments.job(),
         search=arguments.search(),
     ):
-        components.stdout().write(failure.decode('utf-8'))
+        components.stdout().write(failure.message().decode('utf-8'))
     
     
 def main(arguments, stdout=sys.stdout):

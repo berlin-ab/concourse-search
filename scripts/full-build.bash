@@ -2,3 +2,4 @@
 
 ./scripts/unit-tests.bash
 ./scripts/integration-tests.bash
+./scripts/feature-tests.bash
