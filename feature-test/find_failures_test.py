@@ -22,5 +22,5 @@ class FindFailuresTest(unittest.TestCase):
         fake_stdout.seek(0)
 
         all_lines = fake_stdout.readlines()
-        self.assertIn("2 | test replication_views_mirrored ... FAILED\r\n", all_lines)
-        self.assertNotIn("2 | server stopped\r\n", all_lines)
+        self.assertIn("2 | https://prod.ci.gpdb.pivotal.io/teams/main/pipelines/gpdb_master/jobs/icw_planner_centos6/builds/2 | test replication_views_mirrored ... FAILED\r\n", all_lines)
+        self.assertNotIn("2 | https://prod.ci.gpdb.pivotal.io/teams/main/pipelines/gpdb_master/jobs/icw_planner_centos6/builds/2 | server stopped\r\n", all_lines)

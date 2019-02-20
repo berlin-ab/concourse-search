@@ -114,6 +114,7 @@ def make_line(build_number=123,
               target="some-target",
               pipeline="some-pipeline",
               job="some-job",
+              base_url="http://example.com",
 ):
         return Line(
             message=message,
@@ -121,6 +122,7 @@ def make_line(build_number=123,
             pipeline=pipeline,
             build=build_number,
             job=job,
+            base_url=base_url,
         )
     
 class FailureDisplayTest(unittest.TestCase):
@@ -135,3 +137,19 @@ class FailureDisplayTest(unittest.TestCase):
 
         self.assertIn("456 |", stdout.read())
 
+    def test_row_includes_url(self):
+        failure = make_line(
+            build_number=456,
+            base_url='http://example.com/some-base-url',
+            job='some-job',
+            pipeline='some-pipeline'
+        )
+
+        stdout = io.StringIO()
+
+        display_failure_as_row(failure, stdout)
+
+        stdout.seek(0)
+
+        self.assertIn("| http://example.com/some-base-url/teams/main/pipelines/some-pipeline/jobs/some-job/builds/456", stdout.read())
+        

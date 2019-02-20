@@ -91,8 +91,9 @@ class Components():
 
     
 def display_failure_as_row(failure, stdout):
-    stdout.write(u"{build_number} | {message}".format(
+    stdout.write(u"{build_number} | {url} | {message}".format(
         build_number=failure.build(),
+        url=failure.url(),
         message=failure.message().decode('utf-8')
     ))
     

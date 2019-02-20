@@ -30,13 +30,16 @@ def make_line(
         pipeline="some-pipeline",
         job="some-job",
         target="some-target",
-        build=123):
+        build=123,
+        base_url='http://example.com',
+):
     return Line(
         message=message,
         pipeline=pipeline,
         job=job,
         target=target,
         build=build,
+        base_url=base_url,
         )
 
 

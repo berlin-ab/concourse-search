@@ -58,3 +58,15 @@ class ConcourseIntegrationTest(unittest.TestCase):
         
         with open(log_filename, "r") as file:
             self.assertIn("real	60m28.873s\r\n", file.readlines())
+
+    def test_it_returns_a_url_for_the_build_the_line_was_extracted_from(self):
+        lines = ConcourseSearch().find(
+            target="gpdb-prod",
+            pipeline="gpdb_master",
+            job="icw_planner_centos6",
+            build=1
+        )
+
+        line = lines[0]
+
+        self.assertEqual("https://prod.ci.gpdb.pivotal.io/teams/main/pipelines/gpdb_master/jobs/icw_planner_centos6/builds/1", line.url())

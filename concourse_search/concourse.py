@@ -5,7 +5,7 @@ import os
 from concourse_search.domain import Line
 
 
-def transform_lines(lines, target, pipeline, job, build):
+def transform_lines(lines, target, pipeline, job, build, base_url):
     return [
         Line(
             message=line,
@@ -13,6 +13,7 @@ def transform_lines(lines, target, pipeline, job, build):
             pipeline=pipeline,
             job=job,
             build=build,
+            base_url=base_url,
         )
         for line
         in lines
@@ -28,33 +29,9 @@ class ConcourseSearch():
     def __init__(self, logger=default_logger):
         self.logger = logger
                 
-    def _fetch(self, target, pipeline, job, build):
-        self.logger("Searching concourse for build number: {build}".format(
-            build=build
-        ))
-        
-        full_command = [
-            "fly",
-            "--target", str(target),
-            "watch",
-            "--job", "{pipeline}/{job}".format(pipeline=pipeline, job=job),
-            "--build", str(build)
-        ]
-
-        raw_lines = None
-
-        try:
-            raw_lines = subprocess.check_output(
-                full_command
-            )
-        except subprocess.CalledProcessError as error:
-            raw_lines = error.output
-
-
-        return raw_lines
-        
     def find(self, target, pipeline, job, build):
         self.logger("Searching for build number: {build}".format(build=build))
+        base_url = self._get_base_url(target)
         
         if not os.path.exists("/tmp/.concourse-search"):
             os.makedirs("/tmp/.concourse-search")
@@ -80,5 +57,40 @@ class ConcourseSearch():
             pipeline=pipeline,
             job=job,
             build=build,
+            base_url=base_url
         )
 
+    def _get_base_url(self, target):
+        for line in subprocess.check_output(["fly", "targets"]).splitlines(True):
+            if target in line:
+                for item in line.split(" "):
+                    if item.startswith("https"):
+                        return item
+
+        raise RuntimeError("could not find base url for target: {target}".format(target=target))
+
+    def _fetch(self, target, pipeline, job, build):
+        self.logger("Searching concourse for build number: {build}".format(
+            build=build
+        ))
+        
+        full_command = [
+            "fly",
+            "--target", str(target),
+            "watch",
+            "--job", "{pipeline}/{job}".format(pipeline=pipeline, job=job),
+            "--build", str(build)
+        ]
+
+        raw_lines = None
+
+        try:
+            raw_lines = subprocess.check_output(
+                full_command
+            )
+        except subprocess.CalledProcessError as error:
+            raw_lines = error.output
+
+
+        return raw_lines
+        

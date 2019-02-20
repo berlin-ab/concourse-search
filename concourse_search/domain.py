@@ -3,12 +3,13 @@ def do_search(search, line):
 
 
 class Line():
-    def __init__(self, message, target, pipeline, job, build):
+    def __init__(self, message, target, pipeline, job, build, base_url):
         self._message = message
         self._target = target
         self._pipeline = pipeline
         self._job = job
         self._build = build
+        self._base_url = base_url
 
     def message(self):
         return self._message
@@ -24,6 +25,14 @@ class Line():
 
     def build(self):
         return self._build
+
+    def url(self):
+        return u"{base_url}/teams/main/pipelines/{pipeline}/jobs/{job}/builds/{build}".format(
+            base_url=self._base_url,
+            pipeline=self.pipeline(),
+            job=self.job(),
+            build=self.build()
+        )
 
     
 class FindFailuresCommand():
