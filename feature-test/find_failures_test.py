@@ -21,5 +21,5 @@ class FindFailuresTest(unittest.TestCase):
         fake_stdout.seek(0)
 
         all_lines = fake_stdout.readlines()
-        self.assertIn("test replication_views_mirrored ... FAILED\r\n", all_lines)
-        self.assertNotIn("server stopped\r\n", all_lines)
+        self.assertIn("2 | test replication_views_mirrored ... FAILED\r\n", all_lines)
+        self.assertNotIn("2 | server stopped\r\n", all_lines)

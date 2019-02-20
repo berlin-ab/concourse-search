@@ -74,21 +74,21 @@ class ConcourseSearchTest(unittest.TestCase):
         self.assertFalse(command.verbose())
 
 
-def make_line(build=123,
+def make_line(build_number=123,
               message="some message",
               target="some-target",
               job="some-job",
 ):
-        failure = Line(
+        return Line(
             message=message,
-            build=build,
+            build=build_number,
             target=target,
             job=job,
         )
     
 class FailureDisplayTest(unittest.TestCase):
     def test_row_includes_build_number(self):
-        make_line(build_number=456)
+        failure = make_line(build_number=456)
         
         stdout = io.StringIO()
         
