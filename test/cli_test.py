@@ -61,41 +61,17 @@ class FailingBuildsCliTest(unittest.TestCase):
         parsed_args = parse_args(failing_builds_arguments(target='this-target'))
         self.assertEqual(parsed_args.target(), 'this-target')
 
-    def test_parsed_args_requires_target(self):
-        def action():
-            parse_args(failing_builds_arguments(target=None))
-
-        self.assertRaises(SystemExit, action)
-
     def test_parse_args_takes_pipeline_parameter(self):
         parsed_args = parse_args(failing_builds_arguments(pipeline='this-pipeline'))
         self.assertEqual(parsed_args.pipeline(), 'this-pipeline')
-
-    def test_parsed_args_requires_pipeline(self):
-        def action():
-            parse_args(failing_builds_arguments(pipeline=None))
-
-        self.assertRaises(SystemExit, action)
 
     def test_parse_args_takes_job_parameter(self):
         parsed_args = parse_args(failing_builds_arguments(job='this-job'))
         self.assertEqual(parsed_args.job(), 'this-job')
 
-    def test_parsed_args_requires_job(self):
-        def action():
-            parse_args(failing_builds_arguments(job=None))
-
-        self.assertRaises(SystemExit, action)
-
     def test_parse_args_takes_starting_build_parameter(self):
         parsed_args = parse_args(failing_builds_arguments(starting_build='999'))
         self.assertEqual(parsed_args.starting_build(), 999)
-
-    def test_parsed_args_requires_starting_build(self):
-        def action():
-            parse_args(failing_builds_arguments(starting_build=None))
-
-        self.assertRaises(SystemExit, action)
 
     def test_it_takes_a_verbose_argument(self):
         arguments = []
