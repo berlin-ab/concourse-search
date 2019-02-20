@@ -106,3 +106,27 @@ class FindFailuresTest(unittest.TestCase):
         self.assertNotIn(2, stub_find_message_command.build_numbers_used)
         self.assertNotIn(1, stub_find_message_command.build_numbers_used)
 
+    def test_it_does_not_add_duplicate_lines_for_the_same_build_number(self):
+        stub_find_message_command = StubFindMessageCommand()
+        stub_find_message_command.stub([
+            [
+                make_line(message='same', build=2),
+                make_line(message='same', build=2),
+            ],
+            [
+                make_line(message='same', build=1),
+            ]
+        ])
+        
+        command = FindFailuresCommand(stub_find_message_command)
+
+        failures = command.find(
+            target='some-target',
+            pipeline='some-pipeline-name',
+            build=5,
+            job='some-job-name',
+            search=re.compile('same'),
+            limit=2
+        )
+
+        self.assertEqual(2, len(failures))

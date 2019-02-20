@@ -35,31 +35,51 @@ class Line():
         )
 
     
+class FailuresSet():
+
+    def __init__(self):
+        self._storage={}
+
+    def add(self, line):
+        key = "{build_number}|{text}".format(
+            build_number=line.build(),
+            text=line.message(),
+        )
+        
+        self._storage[key] = line
+
+    def all(self):
+        return self._storage.values()
+
+    
 class FindFailuresCommand():
     def __init__(self, concourse_search):
         self._find_message_command = concourse_search
         
     def find(self, target, build, pipeline, job, search, limit=100):
-        results = []
+        failures_set = FailuresSet()
 
         while (build > 0 and limit > 0):
-            results.extend(self._search(target, pipeline, build, job, search))
+            for line in self._search(target, pipeline, build, job, search):
+                failures_set.add(line)
+                
             build = build - 1
             limit = limit - 1
 
-        return results
+        return failures_set.all()
 
     def _search(self, target, pipeline, build, job, search):
         results = []
-        
-        for line in self._find_message_command.find(
-                  target=target,
-                  pipeline=pipeline,
-                  build=build,
-                  job=job
-              ):
 
+        lines = self._find_message_command.find(
+            target=target,
+            pipeline=pipeline,
+            build=build,
+            job=job
+        )
+
+        for line in lines:
             if do_search(search, line):
                 results.append(line)
-
+            
         return results
