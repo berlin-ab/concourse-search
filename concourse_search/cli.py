@@ -21,23 +21,28 @@ def add_pipeline_argument(parser):
 def add_job_argument(parser):
     parser.add_argument('--job', required=True)
 
+
+def add_limit_argument(parser):
+    parser.add_argument('--limit', default=100, type=int)
+    
     
 def find_failures_subparser(subparsers):
     subparser = subparsers.add_parser('find-failures')
     add_target_argument(subparser)
     add_pipeline_argument(subparser)
     add_job_argument(subparser)
-
+    add_limit_argument(subparser)
+    
     subparser.add_argument('--build', type=int, required=True)
     subparser.add_argument('--search', required=True)
-    subparser.add_argument('--limit', default=100, type=int)
-
     
 def failing_builds_subparser(subparsers):
     subparser = subparsers.add_parser('failing-builds')
     add_target_argument(subparser)
     add_pipeline_argument(subparser)
     add_job_argument(subparser)
+    add_limit_argument(subparser)
+    
     subparser.add_argument('--starting-build', type=int, required=True)
 
 
@@ -93,6 +98,7 @@ def failing_builds_runner(components, arguments):
         starting_build_number=arguments.starting_build(),
         pipeline=arguments.pipeline(),
         job=arguments.job(),
+        limit=arguments.limit(),
     ):
         display_build_as_row(build, components.stdout())
 

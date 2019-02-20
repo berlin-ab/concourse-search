@@ -37,6 +37,9 @@ class FailingBuildsArguments():
     def verbose(self):
         return self._arguments.verbose
 
+    def limit(self):
+        return self._arguments.limit
+
 
 class FindFailuresArguments():
     def __init__(self, arguments):

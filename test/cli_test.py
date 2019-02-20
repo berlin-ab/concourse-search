@@ -39,6 +39,7 @@ def failing_builds_arguments(subcommand='failing-builds',
                              pipeline='some-pipeline',
                              job='some-job',
                              starting_build='111',
+                             limit=None,
 ):
     arguments = []
 
@@ -47,6 +48,7 @@ def failing_builds_arguments(subcommand='failing-builds',
     if pipeline: arguments.extend(["--pipeline", pipeline])
     if job: arguments.extend(['--job', job])
     if starting_build: arguments.extend(['--starting-build', starting_build])
+    if limit: arguments.extend(['--limit', limit])
 
     return arguments
 
@@ -72,6 +74,14 @@ class FailingBuildsCliTest(unittest.TestCase):
     def test_parse_args_takes_starting_build_parameter(self):
         parsed_args = parse_args(failing_builds_arguments(starting_build='999'))
         self.assertEqual(parsed_args.starting_build(), 999)
+
+    def test_parse_args_takes_limit_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(limit='99'))
+        self.assertEqual(parsed_args.limit(), 99)
+
+    def test_parse_args_defaults_limit_parameter(self):
+        parsed_args = parse_args(failing_builds_arguments(limit=None))
+        self.assertEqual(parsed_args.limit(), 100)
 
     def test_it_takes_a_verbose_argument(self):
         arguments = []

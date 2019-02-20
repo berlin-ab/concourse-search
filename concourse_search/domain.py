@@ -78,11 +78,11 @@ class FailingBuildsCommand():
     def __init__(self, concourse_search):
         self._concourse_search = concourse_search
     
-    def find(self, target, pipeline, job, starting_build_number):
+    def find(self, target, pipeline, job, starting_build_number, limit):
         return [
             build
             for build
-            in self._concourse_search.find_builds(target, pipeline, job, starting_build_number)
+            in self._concourse_search.find_builds(target, pipeline, job, starting_build_number, limit)
             if build.is_failing()
         ]
 
