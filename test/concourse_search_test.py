@@ -87,12 +87,14 @@ class ConcourseSearchTest(unittest.TestCase):
 def make_line(build_number=123,
               message="some message",
               target="some-target",
+              pipeline="some-pipeline",
               job="some-job",
 ):
         return Line(
             message=message,
-            build=build_number,
             target=target,
+            pipeline=pipeline,
+            build=build_number,
             job=job,
         )
     

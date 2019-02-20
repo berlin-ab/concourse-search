@@ -97,6 +97,7 @@ def find_failures_runner(components, arguments):
     for failure in components.find_failures().find(
         target=arguments.target(),
         build=arguments.build(),
+        pipeline=arguments.pipeline(),
         job=arguments.job(),
         search=arguments.search(),
         limit=arguments.limit(),

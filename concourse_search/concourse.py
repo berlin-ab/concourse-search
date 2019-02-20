@@ -5,12 +5,13 @@ import os
 from concourse_search.domain import Line
 
 
-def transform_lines(lines, job, target, build):
+def transform_lines(lines, target, pipeline, job, build):
     return [
         Line(
             message=line,
-            job=job,
             target=target,
+            pipeline=pipeline,
+            job=job,
             build=build,
         )
         for line
@@ -27,7 +28,7 @@ class ConcourseSearch():
     def __init__(self, logger=default_logger):
         self.logger = logger
                 
-    def _fetch(self, target, job, build):
+    def _fetch(self, target, pipeline, job, build):
         self.logger("Searching concourse for build number: {build}".format(
             build=build
         ))
@@ -36,7 +37,7 @@ class ConcourseSearch():
             "fly",
             "--target", str(target),
             "watch",
-            "--job", str(job),
+            "--job", "{pipeline}/{job}".format(pipeline=pipeline, job=job),
             "--build", str(build)
         ]
 
@@ -52,14 +53,15 @@ class ConcourseSearch():
 
         return raw_lines
         
-    def find(self, target, job, build):
+    def find(self, target, pipeline, job, build):
         self.logger("Searching for build number: {build}".format(build=build))
         
         if not os.path.exists("/tmp/.concourse-search"):
             os.makedirs("/tmp/.concourse-search")
 
-        logfile_path = "/tmp/.concourse-search/{target}-{job}-{build}.log".format(
+        logfile_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}.log".format(
             target=target,
+            pipeline=pipeline.replace("_", "-"),
             job=job.replace("_", "-").replace("/", "-"),
             build=build,
         )
@@ -74,8 +76,9 @@ class ConcourseSearch():
 
         return transform_lines(
             lines=raw_lines.splitlines(True),
-            job=job,
             target=target,
+            pipeline=pipeline,
+            job=job,
             build=build,
         )
 

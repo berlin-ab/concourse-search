@@ -13,7 +13,8 @@ class FindFailuresTest(unittest.TestCase):
         main([
             "find-failures",
             "--target", "gpdb-prod",
-            "--job", "gpdb_master/icw_planner_centos6",
+            "--pipeline", "gpdb_master",
+            "--job", "icw_planner_centos6",
             "--build", "2",
             "--search", "^test replication_views_mirrored\s*\.\.\.\s*FAILED"
         ], stdout=fake_stdout)

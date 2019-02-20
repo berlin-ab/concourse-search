@@ -16,7 +16,7 @@ class StubFindMessageCommand():
     def stub(self, stubbed_rows):
         self._stubbed_rows = stubbed_rows
 
-    def find(self, target, job, build):
+    def find(self, target, pipeline, job, build):
         self.build_numbers_used.append(build)
 
         if self._stubbed_rows:
@@ -25,9 +25,15 @@ class StubFindMessageCommand():
         return []
     
 
-def make_line(message="some message", job="some/job", target="some-target", build=123):
+def make_line(
+        message="some message",
+        pipeline="some-pipeline",
+        job="some-job",
+        target="some-target",
+        build=123):
     return Line(
         message=message,
+        pipeline=pipeline,
         job=job,
         target=target,
         build=build,
@@ -50,6 +56,7 @@ class FindFailuresTest(unittest.TestCase):
 
         failures = command.find(
             target='some-target',
+            pipeline='some-pipeline-name',
             build=1,
             job='some-job-name',
             search=re.compile('def')
@@ -67,6 +74,7 @@ class FindFailuresTest(unittest.TestCase):
 
         command.find(
             target='some-target',
+            pipeline='some-pipeline-name',
             build=2,
             job='some-job-name',
             search=re.compile('def')
@@ -82,15 +90,16 @@ class FindFailuresTest(unittest.TestCase):
 
         command.find(
             target='some-target',
+            pipeline='some-pipeline-name',
             build=5,
             job='some-job-name',
             search=re.compile('def'),
             limit=2
         )
 
-
         self.assertIn(5, stub_find_message_command.build_numbers_used)
         self.assertIn(4, stub_find_message_command.build_numbers_used)
         self.assertNotIn(3, stub_find_message_command.build_numbers_used)
         self.assertNotIn(2, stub_find_message_command.build_numbers_used)
         self.assertNotIn(1, stub_find_message_command.build_numbers_used)
+
