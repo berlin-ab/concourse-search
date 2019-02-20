@@ -45,7 +45,7 @@ class FindFailuresArguments():
 def parse_args(arguments):
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", action='store_true')
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="chosen_command")
     find_failures_parser = subparsers.add_parser('find-failures')
     find_failures_parser.add_argument('--target')
     find_failures_parser.add_argument('--pipeline')
@@ -53,8 +53,12 @@ def parse_args(arguments):
     find_failures_parser.add_argument('--build')
     find_failures_parser.add_argument('--search')
     args = parser.parse_args(arguments)
-    
-    return FindFailuresArguments(args)
+
+    if args.chosen_command == 'find-failures':
+        return FindFailuresArguments(args)
+    else:
+        print("Unknown command")
+        exit(1)
 
 
 class Components():
@@ -99,9 +103,13 @@ def main(arguments, stdout=sys.stdout):
     runners = {
         'find-failures': find_failures_runner
     }
+    
     parsed_arguments = parse_args(arguments)
     components = Components(stdout, parsed_arguments.verbose())
     runner = runners[parsed_arguments.chosen_command().name()]
 
-    runner(components, parsed_arguments)
-    
+    if runner:
+        runner(components, parsed_arguments)
+    else:
+        print("Unknown command")
+        
