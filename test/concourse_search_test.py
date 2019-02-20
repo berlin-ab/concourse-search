@@ -73,6 +73,16 @@ class ConcourseSearchTest(unittest.TestCase):
         command = parsed_args.chosen_command()
         self.assertFalse(command.verbose())
 
+    def test_parsed_args_includes_limit(self):
+        parsed_args = parse_args(["find-failures"])
+        command = parsed_args.chosen_command()
+        self.assertEqual(100, command.limit())
+        
+        parsed_args = parse_args(["find-failures", "--limit", "300"])
+        command = parsed_args.chosen_command()
+        self.assertEqual(300, command.limit())
+        
+
 
 def make_line(build_number=123,
               message="some message",

@@ -38,6 +38,9 @@ class FindFailuresArguments():
     def verbose(self):
         return self._arguments.verbose
 
+    def limit(self):
+        return self._arguments.limit
+
     def chosen_command(self):
         return self
 
@@ -50,8 +53,9 @@ def parse_args(arguments):
     find_failures_parser.add_argument('--target')
     find_failures_parser.add_argument('--pipeline')
     find_failures_parser.add_argument('--job')
-    find_failures_parser.add_argument('--build')
+    find_failures_parser.add_argument('--build', type=int)
     find_failures_parser.add_argument('--search')
+    find_failures_parser.add_argument('--limit', default=100, type=int)
     args = parser.parse_args(arguments)
 
     if args.chosen_command == 'find-failures':
@@ -95,6 +99,7 @@ def find_failures_runner(components, arguments):
         build=arguments.build(),
         job=arguments.job(),
         search=arguments.search(),
+        limit=arguments.limit(),
     ):
         display_failure_as_row(failure, components.stdout())
     
