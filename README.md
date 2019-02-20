@@ -16,7 +16,9 @@ cd concourse-search;
 
 ### Usage:
 
+```
 ./bin/concourse-search find-failures --target some/target --job some_pipeline/some_job --build=[build number] --search='^SomeRegularExpression'
+```
 
 Prints out failures in the given build matching the regular expression.
 
