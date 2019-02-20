@@ -1,0 +1,65 @@
+import re
+
+
+from concourse_search.domain import (
+    FindFailuresCommand,
+)
+
+
+from concourse_search.concourse import (
+    ConcourseSearch
+)
+
+
+class FindFailuresArguments():
+    def __init__(self, arguments):
+        self._arguments = arguments
+        
+    def name(self):
+        return 'find-failures'
+
+    def target(self):
+        return self._arguments.target
+
+    def pipeline(self):
+        return self._arguments.pipeline
+
+    def job(self):
+        return self._arguments.job
+
+    def build(self):
+        return int(self._arguments.build)
+
+    def search(self):
+        return re.compile(self._arguments.search)
+
+    def verbose(self):
+        return self._arguments.verbose
+
+    def limit(self):
+        return self._arguments.limit
+
+    def chosen_command(self):
+        return self
+
+
+class Components():
+    def __init__(self, stdout, debug=False):
+        self._stdout = stdout
+        self.debug = debug
+        
+    def stdout(self):
+        return self._stdout
+
+    def logger(self, message):
+        if self.debug is True:
+            print(message)
+
+    def concourse_search(self):
+        return ConcourseSearch(logger=self.logger)
+
+    def find_failures(self):
+        return FindFailuresCommand(
+            concourse_search=self.concourse_search()
+        )
+

@@ -3,7 +3,7 @@ import re
 import io
 
 
-from concourse_search import (
+from concourse_search.cli import (
     parse_args,
     display_failure_as_row
 )

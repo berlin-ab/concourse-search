@@ -4,6 +4,6 @@ import sys
 
 sys.path.append('.')
 
-from concourse_search import main
+from concourse_search.cli import main
 
 main(sys.argv[1:])

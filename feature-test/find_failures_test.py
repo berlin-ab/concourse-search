@@ -3,7 +3,9 @@ import io
 import tempfile
 
 
-from concourse_search import main
+from concourse_search.cli import (
+    main
+)
 
 
 class FindFailuresTest(unittest.TestCase):
