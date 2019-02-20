@@ -1,9 +1,15 @@
 import unittest
 import re
+import io
 
 
 from concourse_search import (
     parse_args,
+    display_failure_as_row
+)
+
+from concourse_search.domain import (
+    Line
 )
 
 
@@ -67,4 +73,28 @@ class ConcourseSearchTest(unittest.TestCase):
         command = parsed_args.chosen_command()
         self.assertFalse(command.verbose())
 
+
+def make_line(build=123,
+              message="some message",
+              target="some-target",
+              job="some-job",
+):
+        failure = Line(
+            message=message,
+            build=build,
+            target=target,
+            job=job,
+        )
+    
+class FailureDisplayTest(unittest.TestCase):
+    def test_row_includes_build_number(self):
+        make_line(build_number=456)
+        
+        stdout = io.StringIO()
+        
+        display_failure_as_row(failure, stdout)
+
+        stdout.seek(0)
+
+        self.assertIn("456 |", stdout.read())
 

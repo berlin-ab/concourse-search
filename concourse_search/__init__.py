@@ -79,7 +79,10 @@ class Components():
 
     
 def display_failure_as_row(failure, stdout):
-    stdout.write(failure.message().decode('utf-8'))
+    stdout.write(u"{build_number} | {message}".format(
+        build_number=failure.build(),
+        message=failure.message().decode('utf-8')
+    ))
     
         
 def find_failures_runner(components, arguments):
