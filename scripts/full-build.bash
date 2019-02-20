@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
-./scripts/unit-tests.bash
-./scripts/integration-tests.bash
-./scripts/feature-tests.bash
+set -e
+
+pyenv local 2.7.15
+python --version
+
+./scripts/build.bash
+
+pyenv local 3.6.8
+python --version
+
+./scripts/build.bash
