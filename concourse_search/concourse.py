@@ -37,12 +37,32 @@ class Response():
 
     def was_success(self):
         return self._was_success
-        
 
+    
+class ConcourseBaseUrlFinder():
+    def __init__(self):
+        self._cache = {}
+        
+    def find(self, target):
+        return self._cache.get(target, self._fetch(target))
+
+    def _fetch(self, target):
+        for line in subprocess.check_output(["fly", "targets"]).splitlines(True):
+            decoded_line=line.decode('utf-8')
+            if target in decoded_line:
+                for item in decoded_line.split(" "):
+                    if item.startswith("https"):
+                        self._cache[target] = item
+                        return item
+
+        raise RuntimeError("could not find base url for target: {target}".format(target=target))
+
+    
 class ConcourseSearch():
 
     def __init__(self, logger=default_logger):
         self.logger = logger
+        self.concourse_base_url_finder = ConcourseBaseUrlFinder()
 
     def find_builds(self, target, pipeline, job, starting_build_number, limit=100):
         result = []
@@ -80,15 +100,7 @@ class ConcourseSearch():
         )
 
     def _get_base_url(self, target):
-        for line in subprocess.check_output(["fly", "targets"]).splitlines(True):
-            decoded_line=line.decode('utf-8')
-            if target in decoded_line:
-                for item in decoded_line.split(" "):
-                    if item.startswith("https"):
-                        return item
-
-        raise RuntimeError("could not find base url for target: {target}".format(target=target))
-
+        return self.concourse_base_url_finder.find(target)
     
     def _fetch(self, target, pipeline, job, build):
         if not os.path.exists("/tmp/.concourse-search"):
