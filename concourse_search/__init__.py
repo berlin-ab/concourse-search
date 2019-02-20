@@ -44,18 +44,22 @@ class FindFailuresArguments():
     def chosen_command(self):
         return self
 
+def find_failures_subparser(subparsers):
+    find_failures_parser = subparsers.add_parser('find-failures')
+    find_failures_parser.add_argument('--target', required=True)
+    find_failures_parser.add_argument('--pipeline', required=True)
+    find_failures_parser.add_argument('--job', required=True)
+    find_failures_parser.add_argument('--build', type=int, required=True)
+    find_failures_parser.add_argument('--search', required=True)
+    find_failures_parser.add_argument('--limit', default=100, type=int)
 
+    
 def parse_args(arguments):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--verbose", action='store_true')
+    parser.add_argument("--verbose", action='store_true', default=False)
+    
     subparsers = parser.add_subparsers(dest="chosen_command")
-    find_failures_parser = subparsers.add_parser('find-failures')
-    find_failures_parser.add_argument('--target')
-    find_failures_parser.add_argument('--pipeline')
-    find_failures_parser.add_argument('--job')
-    find_failures_parser.add_argument('--build', type=int)
-    find_failures_parser.add_argument('--search')
-    find_failures_parser.add_argument('--limit', default=100, type=int)
+    find_failures_subparser(subparsers)
     args = parser.parse_args(arguments)
 
     if args.chosen_command == 'find-failures':
