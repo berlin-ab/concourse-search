@@ -11,12 +11,18 @@ from concourse_search.domain import (
 class StubFindMessageCommand():
     def __init__(self):
         self._stubbed_rows = []
+        self.build_numbers_used = []
         
     def stub(self, stubbed_rows):
         self._stubbed_rows = stubbed_rows
 
     def find(self, target, job, build):
-        return self._stubbed_rows.pop()
+        self.build_numbers_used.append(build)
+
+        if self._stubbed_rows:
+            return self._stubbed_rows.pop()
+
+        return []
     
 
 def make_line(message="some message"):
@@ -51,4 +57,19 @@ class FindFailuresTest(unittest.TestCase):
         self.assertIn("some line with def", failure_messages)
         self.assertNotIn("some line with abc", failure_messages)
         self.assertNotIn("some line with ghi", failure_messages)
-            
+
+    def test_it_asks_for_all_of_the_builds_lower_than_the_build_number(self):
+        stub_find_message_command = StubFindMessageCommand()
+        command = FindFailuresCommand(stub_find_message_command)
+
+        command.find(
+            target='some-target',
+            build=2,
+            job='some-job-name',
+            search=re.compile('def')
+        )
+
+
+        self.assertIn(1, stub_find_message_command.build_numbers_used)
+        self.assertIn(2, stub_find_message_command.build_numbers_used)
+        

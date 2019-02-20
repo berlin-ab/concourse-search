@@ -17,6 +17,15 @@ class FindFailuresCommand():
         
     def find(self, target, build, job, search):
         results = []
+
+        while (build > 0):
+            results.extend(self._search(target, build, job, search))
+            build = build - 1
+
+        return results
+
+    def _search(self, target, build, job, search):
+        results = []
         
         for line in self._find_message_command.find(
                   target=target,
@@ -26,7 +35,5 @@ class FindFailuresCommand():
 
             if do_search(search, line):
                 results.append(line)
-        
+
         return results
-                
-    

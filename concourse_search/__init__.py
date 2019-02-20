@@ -30,7 +30,7 @@ class FindFailuresArguments():
         return self._arguments.job
 
     def build(self):
-        return self._arguments.build
+        return int(self._arguments.build)
 
     def search(self):
         return re.compile(self._arguments.search)

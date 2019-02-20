@@ -40,13 +40,13 @@ class ConcourseSearchTest(unittest.TestCase):
         self.assertEqual('some/other-job', command.job())
 
     def test_parsed_args_includes_build(self):
-        parsed_args = parse_args(["find-failures", "--build", "some/build"])
+        parsed_args = parse_args(["find-failures", "--build", "456"])
         command = parsed_args.chosen_command()
-        self.assertEqual('some/build', command.build())
+        self.assertEqual(456, command.build())
         
-        parsed_args = parse_args(["find-failures", "--build", "some/other-build"])
+        parsed_args = parse_args(["find-failures", "--build", '123'])
         command = parsed_args.chosen_command()
-        self.assertEqual('some/other-build', command.build())
+        self.assertEqual(123, command.build())
 
         
     def test_parsed_args_includes_search(self):

@@ -14,12 +14,12 @@ class FindFailuresTest(unittest.TestCase):
             "find-failures",
             "--target", "gpdb-prod",
             "--job", "gpdb_master/icw_planner_centos6",
-            "--build", "1537",
-            "--search", "^\+Fatal Python error: GC\s.*$"
+            "--build", "2",
+            "--search", "^test replication_views_mirrored\s*\.\.\.\s*FAILED"
         ], stdout=fake_stdout)
 
         fake_stdout.seek(0)
 
         all_lines = fake_stdout.readlines()
-        self.assertIn("+Fatal Python error: GC object already tracked\r\n", all_lines)
-        self.assertNotIn(" TODAYS_DATE1|INFO|gpload session started TODAYS_DATE2\r\n", all_lines)
+        self.assertIn("test replication_views_mirrored ... FAILED\r\n", all_lines)
+        self.assertNotIn("server stopped\r\n", all_lines)
