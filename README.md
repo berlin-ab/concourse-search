@@ -22,3 +22,27 @@ cd concourse-search;
 
 Prints out failures in the given build matching the regular expression.
 
+
+### Developers
+
+#### Install test dependencies:
+
+```
+pip install -r requirements-development.txt
+```
+
+#### Run unit tests:
+
+./scripts/unit-tests.bash
+
+#### Run integration tests:
+
+./scripts/integration-tests.bash
+
+#### Run feature tests:
+
+./scripts/feature-tests.bash
+
+#### Run everything:
+
+./scripts/full-build.bash
