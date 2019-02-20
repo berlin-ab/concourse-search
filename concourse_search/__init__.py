@@ -35,12 +35,16 @@ class FindFailuresArguments():
     def search(self):
         return re.compile(self._arguments.search)
 
+    def verbose(self):
+        return self._arguments.verbose
+
     def chosen_command(self):
         return self
 
 
 def parse_args(arguments):
     parser = argparse.ArgumentParser()
+    parser.add_argument("--verbose", action='store_true')
     subparsers = parser.add_subparsers()
     find_failures_parser = subparsers.add_parser('find-failures')
     find_failures_parser.add_argument('--target')
@@ -54,30 +58,38 @@ def parse_args(arguments):
 
 
 class Components():
-    def __init__(self, stdout):
+    def __init__(self, stdout, debug=False):
         self._stdout = stdout
+        self.debug = debug
         
     def stdout(self):
         return self._stdout
 
-    def find_message_command(self):
-        return ConcourseSearch()
-        
+    def logger(self, message):
+        if self.debug is True:
+            print(message)
+
+    def concourse_search(self):
+        return ConcourseSearch(logger=self.logger)
+
+    def find_failures(self):
+        return FindFailuresCommand(
+            concourse_search=self.concourse_search()
+        )
+
+    
+def display_failure_as_row(failure, stdout):
+    stdout.write(failure.message().decode('utf-8'))
+    
         
 def find_failures_runner(components, arguments):
-    find_message_command = components.find_message_command()
-
-    find_failures_command = FindFailuresCommand(
-        find_message_command=find_message_command
-    )
-
-    for failure in find_failures_command.find(
+    for failure in components.find_failures().find(
         target=arguments.target(),
         build=arguments.build(),
         job=arguments.job(),
         search=arguments.search(),
     ):
-        components.stdout().write(failure.message().decode('utf-8'))
+        display_failure_as_row(failure, components.stdout())
     
     
 def main(arguments, stdout=sys.stdout):
@@ -85,7 +97,7 @@ def main(arguments, stdout=sys.stdout):
         'find-failures': find_failures_runner
     }
     parsed_arguments = parse_args(arguments)
-    components = Components(stdout)
+    components = Components(stdout, parsed_arguments.verbose())
     runner = runners[parsed_arguments.chosen_command().name()]
 
     runner(components, parsed_arguments)

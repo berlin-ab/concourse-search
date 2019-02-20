@@ -58,5 +58,13 @@ class ConcourseSearchTest(unittest.TestCase):
         command = parsed_args.chosen_command()
         self.assertEqual('some/other-search', command.search().pattern)
 
+    def test_parsed_args_includes_verbose(self):
+        parsed_args = parse_args(["--verbose", "find-failures"])
+        command = parsed_args.chosen_command()
+        self.assertTrue(command.verbose())
+        
+        parsed_args = parse_args(["find-failures"])
+        command = parsed_args.chosen_command()
+        self.assertFalse(command.verbose())
 
 

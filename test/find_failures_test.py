@@ -25,9 +25,12 @@ class StubFindMessageCommand():
         return []
     
 
-def make_line(message="some message"):
+def make_line(message="some message", job="some/job", target="some-target", build=123):
     return Line(
-        message=message
+        message=message,
+        job=job,
+        target=target,
+        build=build,
         )
 
 
@@ -73,3 +76,21 @@ class FindFailuresTest(unittest.TestCase):
         self.assertIn(1, stub_find_message_command.build_numbers_used)
         self.assertIn(2, stub_find_message_command.build_numbers_used)
         
+    def test_it_only_looks_back_n_number_of_builds(self):
+        stub_find_message_command = StubFindMessageCommand()
+        command = FindFailuresCommand(stub_find_message_command)
+
+        command.find(
+            target='some-target',
+            build=5,
+            job='some-job-name',
+            search=re.compile('def'),
+            limit=2
+        )
+
+
+        self.assertIn(5, stub_find_message_command.build_numbers_used)
+        self.assertIn(4, stub_find_message_command.build_numbers_used)
+        self.assertNotIn(3, stub_find_message_command.build_numbers_used)
+        self.assertNotIn(2, stub_find_message_command.build_numbers_used)
+        self.assertNotIn(1, stub_find_message_command.build_numbers_used)
