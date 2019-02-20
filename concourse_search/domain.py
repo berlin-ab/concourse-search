@@ -36,12 +36,13 @@ class Line():
 
 
 class Build():
-    def __init__(self, number, failing, pipeline, job, base_url):
+    def __init__(self, number, failing, pipeline, job, base_url, logfile_path):
         self._number = number
         self._failing = failing
         self._pipeline = pipeline
         self._job = job
         self._base_url = base_url
+        self._logfile_path = logfile_path
 
     def number(self):
         return self._number
@@ -56,6 +57,10 @@ class Build():
             job=self._job,
             build=self.number()
         )
+
+    def logfile_path(self):
+        return self._logfile_path
+    
     
 class FailuresSet():
 

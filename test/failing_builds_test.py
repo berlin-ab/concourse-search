@@ -36,6 +36,7 @@ def make_build(number=111, failing=False):
         pipeline='some-pipeline',
         job='some-job',
         base_url='http://example.com',
+        logfile_path='/tmp/some-logfile-path.log',
     )
 
 

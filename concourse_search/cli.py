@@ -35,6 +35,7 @@ def find_failures_subparser(subparsers):
     
     subparser.add_argument('--build', type=int, required=True)
     subparser.add_argument('--search', required=True)
+
     
 def failing_builds_subparser(subparsers):
     subparser = subparsers.add_parser('failing-builds')
@@ -74,9 +75,10 @@ def display_failure_as_row(failure, stdout):
     
         
 def display_build_as_row(build, stdout):
-    stdout.write(u"{build_number} | {url}\n".format(
+    stdout.write(u"{build_number} | {url} | {logfile_path}\n".format(
         build_number=build.number(),
         url=build.url(),
+        logfile_path=build.logfile_path(),
     ))
     
         

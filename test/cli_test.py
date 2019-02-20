@@ -181,6 +181,7 @@ def make_line(build_number=123,
             job=job,
             base_url=base_url,
         )
+
     
 class FailureDisplayTest(unittest.TestCase):
     def test_row_includes_build_number(self):
@@ -209,4 +210,4 @@ class FailureDisplayTest(unittest.TestCase):
         stdout.seek(0)
 
         self.assertIn("| http://example.com/some-base-url/teams/main/pipelines/some-pipeline/jobs/some-job/builds/456", stdout.read())
-        
+

@@ -28,15 +28,19 @@ def default_logger(message):
 
 
 class Response():
-    def __init__(self, raw_lines, was_success):
+    def __init__(self, raw_lines, was_success, logfile):
         self._raw_lines = raw_lines
         self._was_success = was_success
+        self._logfile = logfile
 
     def raw_lines(self):
         return self._raw_lines
 
     def was_success(self):
         return self._was_success
+
+    def logfile_path(self):
+        return self._logfile
 
     
 class ConcourseBaseUrlFinder():
@@ -77,6 +81,7 @@ class ConcourseSearch():
                     pipeline=pipeline,
                     job=job,
                     base_url=base_url,
+                    logfile_path=response.logfile_path(),
                 )
             )
             starting_build_number = starting_build_number - 1
@@ -112,6 +117,7 @@ class ConcourseSearch():
             job=job.replace("_", "-").replace("/", "-"),
             build=build,
         )
+        
         success_file_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}-was-success.log".format(
             target=target,
             pipeline=pipeline.replace("_", "-"),
@@ -139,8 +145,8 @@ class ConcourseSearch():
             return Response(
                 raw_lines=raw_lines,
                 was_success=was_success,
+                logfile=logfile_path,
             )
-
 
     def _do_fetch(self, target, pipeline, job, build):
         self.logger("Searching concourse for build number: {build}".format(
