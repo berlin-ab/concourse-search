@@ -44,7 +44,7 @@ class ConcourseSearch():
         )
 
         if not os.path.exists(logfile_path):
-            raw_lines = self._fetch(target, job, build)
+            raw_lines = self._fetch(target, pipeline, job, build)
             with open(logfile_path, "wb") as logfile:
                 logfile.write(raw_lines)
         else:
@@ -62,8 +62,9 @@ class ConcourseSearch():
 
     def _get_base_url(self, target):
         for line in subprocess.check_output(["fly", "targets"]).splitlines(True):
-            if target in line:
-                for item in line.split(" "):
+            decoded_line=line.decode('utf-8')
+            if target in decoded_line:
+                for item in decoded_line.split(" "):
                     if item.startswith("https"):
                         return item
 
