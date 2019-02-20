@@ -1,4 +1,4 @@
-def do_search(search, line):
+def matches_search_criteria(search, line):
     return search.search(line.message().decode('utf-8'))
 
 
@@ -69,8 +69,6 @@ class FindFailuresCommand():
         return failures_set.all()
 
     def _search(self, target, pipeline, build, job, search):
-        results = []
-
         lines = self._find_message_command.find(
             target=target,
             pipeline=pipeline,
@@ -78,8 +76,8 @@ class FindFailuresCommand():
             job=job
         )
 
-        for line in lines:
-            if do_search(search, line):
-                results.append(line)
-            
-        return results
+        return [line
+                for line
+                in lines
+                if matches_search_criteria(search, line)]
+              
