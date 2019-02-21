@@ -1,19 +1,29 @@
 import unittest
-
+import requests
 
 from concourse_search.concourse import (
     ConcourseSearch,
 )
 
+
 from concourse_search.fly import (
     FlyViaCli,
 )
 
-class ConcourseIntegrationTest(unittest.TestCase):
+
+from concourse_search.fly import (
+    FlyViaHttp
+)
+
+
+requests_session = requests.Session()
+
+
+class ConcourseIntegrationTest():
     def setUp(self):
         import shutil
         shutil.rmtree("/tmp/.concourse-search", ignore_errors=True)
-        self.concourse_search = ConcourseSearch(fly=FlyViaCli())
+        self.concourse_search = self.load_concourse_search()
         
     def test_it_returns_lines_from_a_concourse_build(self):
         lines = self.concourse_search.find(
@@ -25,7 +35,7 @@ class ConcourseIntegrationTest(unittest.TestCase):
 
         line_messages = [line.message() for line in lines]
 
-        self.assertIn("real	60m28.873s\r\n", line_messages)
+        self.assertIn("real\t60m28.873s\r\n", line_messages)
 
         line = lines[0]
         self.assertEqual(line.pipeline(), "gpdb_master")
@@ -101,4 +111,14 @@ class ConcourseIntegrationTest(unittest.TestCase):
 
         build_numbers = [build.number() for build in builds]
         self.assertEqual([10, 9], build_numbers)
+
+
+class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
+    def load_concourse_search(self):
+        return ConcourseSearch(fly=FlyViaHttp(session=requests_session))
+
+    
+class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
+    def load_concourse_search(self):
+        return ConcourseSearch(fly=FlyViaCli())
 

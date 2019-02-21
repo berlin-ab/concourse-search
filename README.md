@@ -6,12 +6,17 @@ Spelunk through Concourse CI build logs
 
 ### Installation:
 
-* download the `fly` utility from concourse and ensure it is in your PATH
+* Download the `fly` utility from concourse and ensure it is in your PATH
 * Download the project:
 
 ```
 git clone https://github.com/berlin-ab/concourse-search.git
 cd concourse-search;
+```
+* Install dependencies:
+
+```
+pip install -r requirements.txt
 ```
 
 ### Usage:

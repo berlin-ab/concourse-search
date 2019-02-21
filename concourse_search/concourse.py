@@ -118,10 +118,13 @@ class ConcourseSearchStorage():
     def store(self, concourse_build, response):
         logfile_path = self.logfile_path(concourse_build)
         success_file_path = self.success_file_path(concourse_build)
-        
+
         with open(logfile_path, "wb") as logfile:
             for line in response.lines():
-                logfile.write(line)
+                try:
+                    logfile.write(line.encode('utf-8'))
+                except UnicodeDecodeError as error:
+                    logfile.write(line)
 
         if response.was_success():
             with open(success_file_path, "w") as logfile:
