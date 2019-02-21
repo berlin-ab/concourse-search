@@ -5,13 +5,22 @@ from concourse_search.concourse import (
     ConcourseSearch,
 )
 
+
 from concourse_search.fly import (
     FlyViaCli,
 )
 
-class ConcourseIntegrationTest(unittest.TestCase):
+
+from concourse_search.fly import (
+    FlyViaHttp
+)
+
+
+class ConcourseIntegrationTest():
     def setUp(self):
-        self.concourse_search = ConcourseSearch(fly=FlyViaCli())
+        import shutil
+        shutil.rmtree("/tmp/.concourse-search", ignore_errors=True)
+        self.concourse_search = self.load_concourse_search()
         
     def test_it_returns_lines_from_a_concourse_build(self):
         lines = self.concourse_search.find(
@@ -99,4 +108,14 @@ class ConcourseIntegrationTest(unittest.TestCase):
 
         build_numbers = [build.number() for build in builds]
         self.assertEqual([10, 9], build_numbers)
+
+
+class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
+    def load_concourse_search(self):
+        return ConcourseSearch(fly=FlyViaHttp())
+
+
+class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
+    def load_concourse_search(self):
+        return ConcourseSearch(fly=FlyViaCli())
 

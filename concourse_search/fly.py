@@ -1,4 +1,6 @@
 import subprocess
+import yaml
+import os
 
 
 class FlyWatchResponse():
@@ -14,12 +16,45 @@ class FlyWatchResponse():
 
     
 class FlyTarget():
-    def __init__(self, url):
+    def __init__(self, url, name):
         self._url = url
+        self._name = name
 
     def url(self):
         return self._url
+
+    def matches(self, name):
+        return self._name == name
+
     
+class FlyViaHttp():
+    def targets(self):
+        data = yaml.load(file(os.path.expanduser("~/.flyrc"), 'r'))
+        targets = data.get('targets', {})
+        return [
+            FlyTarget(targets[key]['api'], key) for key in targets.keys()]
+
+    def target_matching(self, target_name):
+        for target in self.targets():
+            if target.matches(target_name):
+                return target
+
+        raise RuntimeError("could not find base url for target: {target}".format(
+            target=target_name
+        ))
+    
+    def watch(self, target, pipeline, job, build):
+        fly_target = self.target_matching(target)
+        
+        requests.get('{base_url}/{}'.format(
+            base_url=fly_target.url(),
+        ))
+        
+        return FlyWatchResponse(
+            raw_lines=u'',
+            was_success=True,
+        )
+
     
 class FlyViaCli():
     def targets(self):
@@ -67,5 +102,4 @@ class FlyViaCli():
         for item in line.split(" "):
             if item.startswith("https"):
                 return FlyTarget(url=item)
-    
     
