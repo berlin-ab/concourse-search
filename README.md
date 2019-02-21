@@ -23,6 +23,16 @@ cd concourse-search;
 Prints out failures in the given build matching the regular expression.
 
 
+### Commands:
+
+#### *find-failures*
+
+Find all occurrences of a failure in a job.
+
+#### *failing-builds*
+
+Find all of the failing builds for a job.
+
 ### Developers
 
 #### Install test dependencies:
