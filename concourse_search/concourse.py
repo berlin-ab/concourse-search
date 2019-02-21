@@ -8,15 +8,15 @@ from concourse_search.domain import (
 )
 
 
-def transform_lines(lines, target, pipeline, job, build, base_url):
+def transform_lines(lines, target, concourse_build):
     return [
         Line(
             message=line,
             target=target,
-            pipeline=pipeline,
-            job=job,
-            build=build,
-            base_url=base_url,
+            pipeline=concourse_build.pipeline(),
+            job=concourse_build.job(),
+            build=concourse_build.build_number(),
+            base_url=concourse_build.base_url(),
         )
         for line
         in lines
@@ -110,6 +110,7 @@ class ConcourseBaseUrlFinder():
         self._cache[target] = fly_target.url()
         return fly_target.url()
 
+    
 class BuildResponse():
     def __init__(self, raw_lines, was_success, logfile_path):
         self._raw_lines = raw_lines
@@ -126,6 +127,37 @@ class BuildResponse():
         return self._logfile_path
         
         
+class ConcourseBuild():
+    def __init__(self, target, pipeline, job, build_number, base_url):
+        self._target = target
+        self._pipeline = pipeline
+        self._job = job
+        self._build_number = build_number
+        self._base_url = base_url
+
+    def target(self):
+        return self._target
+
+    def pipeline(self):
+        return self._pipeline
+
+    def job(self):
+        return self._job
+
+    def build_number(self):
+        return self._build_number
+
+    def base_url(self):
+        return self._base_url
+
+    def previous_build(self):
+        return ConcourseBuild(
+            target=self.target(),
+            pipeline=self.pipeline(),
+            job=self.job(),
+            build_number=self.build_number()-1,
+            base_url=self.base_url(),
+        )
     
 class ConcourseSearch():
 
@@ -134,64 +166,73 @@ class ConcourseSearch():
         self.concourse_base_url_finder = ConcourseBaseUrlFinder(fly=fly)
 
     def find_builds(self, target, pipeline, job, starting_build_number, limit=100):
-        result = []
         base_url = self._get_base_url(target)
+
+        concourse_build = ConcourseBuild(
+            target=target,
+            pipeline=pipeline,
+            job=job,
+            build_number=starting_build_number,
+            base_url=base_url,
+        )
         
-        while (starting_build_number > 0 and limit > 0):
-            response = self._fetch(target, pipeline, job, starting_build_number)
+        result = []
+        
+        while (concourse_build.build_number() > 0 and limit > 0):
+            response = self._fetch(concourse_build)
+            
             result.append(
                 Build(
-                    number=starting_build_number,
+                    number=concourse_build.build_number(),
                     failing=(not response.was_success()),
-                    pipeline=pipeline,
-                    job=job,
-                    base_url=base_url,
+                    pipeline=concourse_build.pipeline(),
+                    job=concourse_build.job(),
+                    base_url=concourse_build.base_url(),
                     logfile_path=response.logfile_path(),
                 )
             )
-            starting_build_number = starting_build_number - 1
+
+            concourse_build = concourse_build.previous_build()
+
             limit = limit - 1
 
         return result
     
     def find(self, target, pipeline, job, build):
         self.logger("Searching for build number: {build}".format(build=build))
-
-        base_url = self._get_base_url(target)
-        raw_lines = self._fetch(target, pipeline, job, build).raw_lines()
+        base_url = self._get_base_url(target)        
+        concourse_build = ConcourseBuild(target, pipeline, job, build, base_url)
+        raw_lines = self._fetch(concourse_build).raw_lines()
 
         return transform_lines(
             lines=raw_lines.splitlines(True),
             target=target,
-            pipeline=pipeline,
-            job=job,
-            build=build,
-            base_url=base_url
+            concourse_build=concourse_build,
         )
 
     def _get_base_url(self, target):
         return self.concourse_base_url_finder.find(target)
     
-    def _fetch(self, target, pipeline, job, build):
+    def _fetch(self, concourse_build):
         if not os.path.exists("/tmp/.concourse-search"):
             os.makedirs("/tmp/.concourse-search")
 
         logfile_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}.log".format(
-            target=target,
-            pipeline=pipeline.replace("_", "-"),
-            job=job.replace("_", "-").replace("/", "-"),
-            build=build,
+            target=concourse_build.target(),
+            pipeline=concourse_build.pipeline().replace("_", "-"),
+            job=concourse_build.job().replace("_", "-").replace("/", "-"),
+            build=concourse_build.build_number(),
         )
         
         success_file_path = "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}-was-success.log".format(
-            target=target,
-            pipeline=pipeline.replace("_", "-"),
-            job=job.replace("_", "-").replace("/", "-"),
-            build=build,
+            target=concourse_build.target(),
+            pipeline=concourse_build.pipeline().replace("_", "-"),
+            job=concourse_build.job().replace("_", "-").replace("/", "-"),
+            build=concourse_build.build_number(),
         )
 
         if not os.path.exists(logfile_path):
-            response = self._do_fetch(target, pipeline, job, build)
+            response = self._do_fetch(concourse_build)
             
             with open(logfile_path, "wb") as logfile:
                 logfile.write(response.raw_lines())
@@ -213,11 +254,15 @@ class ConcourseSearch():
                 logfile_path=logfile_path,
             )
 
-    def _do_fetch(self, target, pipeline, job, build):
+    def _do_fetch(self, concourse_build):
         self.logger("Searching concourse for build number: {build}".format(
-            build=build
+            build=concourse_build.build()
         ))
 
-        return self._fly.watch(target, pipeline, job, build)
+        return self._fly.watch(
+            target=concourse_build.target(),
+            pipeline=concourse_build.pipeline(),
+            job=concourse_build.job(),
+            build=concourse_build.build_number(),
+        )
         
-
