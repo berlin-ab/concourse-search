@@ -27,8 +27,8 @@ def default_logger(message):
     pass
 
 
-class Response():
-    def __init__(self, raw_lines, was_success, logfile):
+class FlyWatchResponse():
+    def __init__(self, raw_lines, was_success):
         self._raw_lines = raw_lines
         self._was_success = was_success
         self._logfile = logfile
@@ -38,9 +38,6 @@ class Response():
 
     def was_success(self):
         return self._was_success
-
-    def logfile_path(self):
-        return self._logfile
 
     
 class FlyTarget():
@@ -66,6 +63,32 @@ class Fly():
 
         raise RuntimeError("could not find base url for target: {target}".format(target=target))
 
+    def watch(self, target, pipeline, job, build):
+        full_command = [
+            "fly",
+            "--target", str(target),
+            "watch",
+            "--job", "{pipeline}/{job}".format(pipeline=pipeline, job=job),
+            "--build", str(build)
+        ]
+
+        raw_lines = None
+        was_success = False
+
+        try:
+            raw_lines = subprocess.check_output(
+                full_command
+            )
+            was_success = True
+        
+        except subprocess.CalledProcessError as error:
+            raw_lines = error.output
+
+        return FlyWatchResponse(
+            raw_lines=raw_lines,
+            was_success=was_success,
+        )
+        
     @staticmethod
     def _parse_target_line(line):
         for item in line.split(" "):
@@ -87,6 +110,22 @@ class ConcourseBaseUrlFinder():
         self._cache[target] = fly_target.url()
         return fly_target.url()
 
+class BuildResponse():
+    def __init__(self, raw_lines, was_success, logfile_path):
+        self._raw_lines = raw_lines
+        self._was_success = was_success
+        self._logfile_path = logfile_path
+
+    def raw_lines(self):
+        return self._raw_lines
+
+    def was_success(self):
+        return self._was_success
+
+    def logfile_path(self):
+        return self._logfile_path
+        
+        
     
 class ConcourseSearch():
 
@@ -168,41 +207,17 @@ class ConcourseSearch():
 
             was_success =  os.path.exists(success_file_path)
 
-            return Response(
+            return BuildResponse(
                 raw_lines=raw_lines,
                 was_success=was_success,
-                logfile=logfile_path,
+                logfile_path=logfile_path,
             )
 
     def _do_fetch(self, target, pipeline, job, build):
         self.logger("Searching concourse for build number: {build}".format(
             build=build
         ))
+
+        return self._fly.watch(target, pipeline, job, build)
         
-        full_command = [
-            "fly",
-            "--target", str(target),
-            "watch",
-            "--job", "{pipeline}/{job}".format(pipeline=pipeline, job=job),
-            "--build", str(build)
-        ]
 
-        raw_lines = None
-        was_success = False
-
-        try:
-            raw_lines = subprocess.check_output(
-                full_command
-            )
-            was_success = True
-        
-        except subprocess.CalledProcessError as error:
-            raw_lines = error.output
-
-        return Response(
-            raw_lines=raw_lines,
-            was_success=was_success,
-        )
-
-
-        
