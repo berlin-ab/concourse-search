@@ -2,12 +2,12 @@ import subprocess
 
 
 class FlyWatchResponse():
-    def __init__(self, raw_lines, was_success):
-        self._raw_lines = raw_lines
+    def __init__(self, lines, was_success):
+        self._lines = lines
         self._was_success = was_success
 
-    def raw_lines(self):
-        return self._raw_lines
+    def lines(self):
+        return self._lines
 
     def was_success(self):
         return self._was_success
@@ -45,20 +45,20 @@ class FlyViaCli():
             "--build", str(build)
         ]
 
-        raw_lines = None
+        lines = None
         was_success = False
 
         try:
-            raw_lines = subprocess.check_output(
+            lines = subprocess.check_output(
                 full_command
-            )
+            ).splitlines(True)
             was_success = True
         
         except subprocess.CalledProcessError as error:
-            raw_lines = error.output
+            lines = error.output.splitlines(True)
 
         return FlyWatchResponse(
-            raw_lines=raw_lines,
+            lines=lines,
             was_success=was_success,
         )
         

@@ -41,13 +41,13 @@ class ConcourseBaseUrlFinder():
 
     
 class BuildResponse():
-    def __init__(self, raw_lines, was_success, logfile_path):
-        self._raw_lines = raw_lines
+    def __init__(self, lines, was_success, logfile_path):
+        self._lines = lines
         self._was_success = was_success
         self._logfile_path = logfile_path
 
-    def raw_lines(self):
-        return self._raw_lines
+    def lines(self):
+        return self._lines
 
     def was_success(self):
         return self._was_success
@@ -120,7 +120,8 @@ class ConcourseSearchStorage():
         success_file_path = self.success_file_path(concourse_build)
         
         with open(logfile_path, "wb") as logfile:
-            logfile.write(response.raw_lines())
+            for line in response.lines():
+                logfile.write(line)
 
         if response.was_success():
             with open(success_file_path, "w") as logfile:
@@ -131,12 +132,12 @@ class ConcourseSearchStorage():
         success_file_path = self.success_file_path(concourse_build)
         
         with open(logfile_path, "rb") as file:
-            raw_lines = file.read()
+            lines = file.read().splitlines(True)
             
         was_success = os.path.exists(success_file_path)
 
         return BuildResponse(
-            raw_lines=raw_lines,
+            lines=lines,
             was_success=was_success,
             logfile_path=logfile_path,
         )
@@ -195,10 +196,10 @@ class ConcourseSearch():
             base_url=base_url
         )
 
-        raw_lines = self._fetch_log_from_cache(concourse_build).raw_lines()
+        lines = self._fetch_log_from_cache(concourse_build).lines()
 
         return transform_lines(
-            lines=raw_lines.splitlines(True),
+            lines=lines,
             target=target,
             concourse_build=concourse_build,
         )

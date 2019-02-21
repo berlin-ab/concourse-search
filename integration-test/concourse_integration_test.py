@@ -11,6 +11,8 @@ from concourse_search.fly import (
 
 class ConcourseIntegrationTest(unittest.TestCase):
     def setUp(self):
+        import shutil
+        shutil.rmtree("/tmp/.concourse-search", ignore_errors=True)
         self.concourse_search = ConcourseSearch(fly=FlyViaCli())
         
     def test_it_returns_lines_from_a_concourse_build(self):
