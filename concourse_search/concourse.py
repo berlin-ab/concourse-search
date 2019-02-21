@@ -230,7 +230,7 @@ class ConcourseSearch():
         result = []
         
         while (concourse_build.build_number() > 0 and limit > 0):
-            response = self._fetch(concourse_build)
+            response = self._fetch_log_from_cache(concourse_build)
             
             result.append(
                 Build(
@@ -252,6 +252,7 @@ class ConcourseSearch():
     def find(self, target, pipeline, job, build):
         self.logger("Searching for build number: {build}".format(build=build))
         base_url = self._get_base_url(target)
+
         concourse_build = ConcourseBuild(
             target=target,
             pipeline=pipeline,
@@ -259,7 +260,8 @@ class ConcourseSearch():
             build_number=build,
             base_url=base_url
         )
-        raw_lines = self._fetch(concourse_build).raw_lines()
+
+        raw_lines = self._fetch_log_from_cache(concourse_build).raw_lines()
 
         return transform_lines(
             lines=raw_lines.splitlines(True),
@@ -270,19 +272,19 @@ class ConcourseSearch():
     def _get_base_url(self, target):
         return self.concourse_base_url_finder.find(target)
     
-    def _fetch(self, concourse_build):
+    def _fetch_log_from_cache(self, concourse_build):
         self._storage.ensure_storage_exists()
         
         logfile_path = self._storage.logfile_path(concourse_build)
         success_file_path = self._storage.success_file_path(concourse_build)
 
         if not self._storage.contains(concourse_build):
-            response = self._do_fetch(concourse_build)
+            response = self._fetch_log_from_fly(concourse_build)
             self._storage.store(concourse_build, response)
 
         return self._storage.retrieve(concourse_build)
 
-    def _do_fetch(self, concourse_build):
+    def _fetch_log_from_fly(self, concourse_build):
         self.logger("Searching concourse for build number: {build}".format(
             build=concourse_build.build_number()
         ))
@@ -293,4 +295,4 @@ class ConcourseSearch():
             job=concourse_build.job(),
             build=concourse_build.build_number(),
         )
-        
+
