@@ -9,6 +9,9 @@ from concourse_search.domain import (
 
 from concourse_search.concourse import (
     ConcourseSearch,
+)
+
+from concourse_search.fly import (
     Fly,
 )
 

@@ -3,9 +3,11 @@ import unittest
 
 from concourse_search.concourse import (
     ConcourseSearch,
-    Fly,
 )
 
+from concourse_search.fly import (
+    Fly,
+)
 
 class ConcourseIntegrationTest(unittest.TestCase):
     def setUp(self):
