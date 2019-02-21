@@ -6,12 +6,12 @@ from concourse_search.concourse import (
 )
 
 from concourse_search.fly import (
-    Fly,
+    FlyViaCli,
 )
 
 class ConcourseIntegrationTest(unittest.TestCase):
     def setUp(self):
-        self.concourse_search = ConcourseSearch(fly=Fly())
+        self.concourse_search = ConcourseSearch(fly=FlyViaCli())
         
     def test_it_returns_lines_from_a_concourse_build(self):
         lines = self.concourse_search.find(

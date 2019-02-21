@@ -21,7 +21,7 @@ class FlyTarget():
         return self._url
     
     
-class Fly():
+class FlyViaCli():
     def targets(self):
         return [
             line.decode('utf-8')

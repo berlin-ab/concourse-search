@@ -12,7 +12,7 @@ from concourse_search.concourse import (
 )
 
 from concourse_search.fly import (
-    Fly,
+    FlyViaCli,
 )
 
 
@@ -90,7 +90,7 @@ class Components():
             print(message)
 
     def fly(self):
-        return Fly()
+        return FlyViaCli()
 
     def concourse_search(self):
         return ConcourseSearch(
