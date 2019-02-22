@@ -38,6 +38,9 @@ class FlyTarget():
         return self._token
 
     
+class FlyBuildNotFound(RuntimeError): pass
+
+    
 class FlyViaHttp():
     def __init__(self, session=requests.Session()):
         with open(os.path.expanduser("~/.flyrc"), 'r') as file:
@@ -73,6 +76,9 @@ class FlyViaHttp():
             job=job,
             build=build,
         ))
+
+        if response.status_code != 200:
+            raise FlyBuildNotFound(target, pipeline, job, build)
 
         events_path = response.json()['api_url']
         events = []

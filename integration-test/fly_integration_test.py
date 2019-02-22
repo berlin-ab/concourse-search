@@ -3,6 +3,7 @@ import unittest
 
 from concourse_search.fly import (
     FlyViaHttp,
+    FlyBuildNotFound,
 )
 
 
@@ -37,3 +38,8 @@ class FlyViaHttpIntegrationTest(unittest.TestCase):
 
         self.assertFalse(watch_response.was_success())
         
+    def test_it_throws_an_exception_when_asking_for_a_job_that_does_not_exist(self):
+        fly = FlyViaHttp()
+
+        with self.assertRaises(FlyBuildNotFound):
+            fly.watch('gpdb-prod', 'gpdb-master', 'some-nonsense', 1)

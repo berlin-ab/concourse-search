@@ -127,7 +127,7 @@ class ConcourseSearch():
         return result
     
     def find(self, target, pipeline, job, build):
-        self.logger("Searching for build number: {build}".format(build=build))
+        self.logger("Searching for build number in : {build}, {job}".format(build=build, job=job))
         base_url = self._get_base_url(target)
 
         concourse_build = ConcourseBuild(
