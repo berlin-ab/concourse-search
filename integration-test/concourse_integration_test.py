@@ -25,8 +25,6 @@ requests_session = requests.Session()
 
 class ConcourseIntegrationTest():
     def setUp(self):
-        import shutil
-        shutil.rmtree("/tmp/.concourse-search", ignore_errors=True)
         self.concourse_search = self.load_concourse_search()
         
     def test_it_returns_lines_from_a_concourse_build(self):

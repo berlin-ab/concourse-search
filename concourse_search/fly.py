@@ -122,7 +122,7 @@ class FlyViaCli():
     def target_matching(self, target):
         for line in self.targets():
             if target in line:
-                return self._parse_target_line(line)
+                return self._parse_target_line(line, target)
 
         raise RuntimeError("could not find base url for target: {target}".format(target=target))
 
@@ -153,8 +153,11 @@ class FlyViaCli():
         )
         
     @staticmethod
-    def _parse_target_line(line):
+    def _parse_target_line(line, target):
         for item in line.split(" "):
             if item.startswith("https"):
-                return FlyTarget(url=item, name='')
+                return FlyTarget(
+                    url=item,
+                    name=target,
+                )
     
