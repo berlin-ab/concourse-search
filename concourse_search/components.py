@@ -11,6 +11,12 @@ from concourse_search.concourse import (
     ConcourseSearch,
 )
 
+
+from concourse_search.storage import (
+    ConcourseSearchStorage
+)
+
+
 from concourse_search.fly import (
     FlyViaCli,
     FlyViaHttp,
@@ -93,10 +99,14 @@ class Components():
     def fly(self):
         return FlyViaHttp()
 
+    def concourse_search_storage(self):
+        return ConcourseSearchStorage()
+
     def concourse_search(self):
         return ConcourseSearch(
             logger=self.logger,
-            fly=self.fly()
+            fly=self.fly(),
+            storage=self.concourse_search_storage()
         )
 
     def find_failures(self):

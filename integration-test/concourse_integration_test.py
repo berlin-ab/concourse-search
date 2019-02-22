@@ -5,6 +5,10 @@ from concourse_search.concourse import (
     ConcourseSearch,
 )
 
+from concourse_search.storage import (
+    ConcourseSearchStorage
+)
+
 
 from concourse_search.fly import (
     FlyViaCli,
@@ -115,10 +119,16 @@ class ConcourseIntegrationTest():
 
 class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
-        return ConcourseSearch(fly=FlyViaHttp(session=requests_session))
+        return ConcourseSearch(
+            fly=FlyViaHttp(session=requests_session),
+            storage=ConcourseSearchStorage()
+        )
 
     
 class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
-        return ConcourseSearch(fly=FlyViaCli())
+        return ConcourseSearch(
+            fly=FlyViaCli(),
+            storage=ConcourseSearchStorage()
+        )
 
