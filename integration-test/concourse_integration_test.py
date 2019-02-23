@@ -24,10 +24,6 @@ requests_session = requests.Session()
 
 
 class ConcourseIntegrationTest():
-    @classmethod
-    def setUpClass(self):
-        import shutil
-        shutil.rmtree("/tmp/.concourse-search")
         
     def setUp(self):
         self.concourse_search = self.load_concourse_search()
@@ -85,7 +81,7 @@ class ConcourseIntegrationTest():
             build=1
         )
         
-        log_filename = "/tmp/.concourse-search/gpdb-prod-gpdb-master-icw-planner-centos6-1.log"
+        log_filename = "/tmp/.concourse-search-test/gpdb-prod-gpdb-master-icw-planner-centos6-1.log"
         
         with open(log_filename, "r") as file:
             self.assertIn("real	60m28.873s\r\n", file.readlines())
@@ -131,16 +127,18 @@ class ConcourseIntegrationTest():
 
 class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
+        self.storage = ConcourseSearchStorage("/tmp/.concourse-search-test")
         return ConcourseSearch(
             fly=FlyViaHttp(session=requests_session),
-            storage=ConcourseSearchStorage("/tmp/.concourse-search-test")
+            storage=self.storage
         )
 
     
 class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
+        self.storage = ConcourseSearchStorage("/tmp/.concourse-search-test")
         return ConcourseSearch(
             fly=FlyViaCli(),
-            storage=ConcourseSearchStorage("/tmp/.concourse-search-test")
+            storage=self.storage
         )
 
