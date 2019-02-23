@@ -16,7 +16,7 @@ class StubFindMessageCommand():
     def stub(self, stubbed_rows):
         self._stubbed_rows = stubbed_rows
 
-    def find(self, target, pipeline, job, build):
+    def find(self, team_name, target, pipeline, job, build):
         self.build_numbers_used.append(build)
 
         if self._stubbed_rows:
@@ -26,6 +26,7 @@ class StubFindMessageCommand():
     
 
 def make_line(
+        team_name="some-team-name",
         message="some message",
         pipeline="some-pipeline",
         job="some-job",
@@ -34,6 +35,7 @@ def make_line(
         base_url='http://example.com',
 ):
     return Line(
+        team_name=team_name,
         message=message,
         pipeline=pipeline,
         job=job,
@@ -58,6 +60,7 @@ class FindFailuresTest(unittest.TestCase):
         command = FindFailuresCommand(stub_find_message_command)
 
         failures = command.find(
+            team_name="some-team-name",
             target='some-target',
             pipeline='some-pipeline-name',
             build=1,
@@ -76,6 +79,7 @@ class FindFailuresTest(unittest.TestCase):
         command = FindFailuresCommand(stub_find_message_command)
 
         command.find(
+            team_name="some-team-name",
             target='some-target',
             pipeline='some-pipeline-name',
             build=2,
@@ -92,6 +96,7 @@ class FindFailuresTest(unittest.TestCase):
         command = FindFailuresCommand(stub_find_message_command)
 
         command.find(
+            team_name="some-team-name",
             target='some-target',
             pipeline='some-pipeline-name',
             build=5,
@@ -121,6 +126,7 @@ class FindFailuresTest(unittest.TestCase):
         command = FindFailuresCommand(stub_find_message_command)
 
         failures = command.find(
+            team_name="some-team-name",
             target='some-target',
             pipeline='some-pipeline-name',
             build=5,

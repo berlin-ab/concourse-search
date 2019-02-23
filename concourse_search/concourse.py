@@ -7,6 +7,7 @@ from concourse_search.domain import (
 def transform_lines(lines, target, concourse_build):
     return [
         Line(
+            team_name=concourse_build.team_name(),
             message=line,
             target=target,
             pipeline=concourse_build.pipeline(),
@@ -54,12 +55,13 @@ class BuildResponse():
         
         
 class ConcourseBuild():
-    def __init__(self, target, pipeline, job, build_number, base_url):
+    def __init__(self, team_name, target, pipeline, job, build_number, base_url):
         self._target = target
         self._pipeline = pipeline
         self._job = job
         self._build_number = build_number
         self._base_url = base_url
+        self._team_name = team_name
 
     def target(self):
         return self._target
@@ -76,8 +78,12 @@ class ConcourseBuild():
     def base_url(self):
         return self._base_url
 
+    def team_name(self):
+        return self._team_name
+    
     def previous_build(self):
         return ConcourseBuild(
+            team_name=self.team_name(),
             target=self.target(),
             pipeline=self.pipeline(),
             job=self.job(),
@@ -93,10 +99,11 @@ class ConcourseSearch():
         self._storage = storage
         self._fly = fly
 
-    def find_builds(self, target, pipeline, job, starting_build_number, limit=100):
+    def find_builds(self, team_name, target, pipeline, job, starting_build_number, limit=100):
         base_url = self._get_base_url(target)
 
         concourse_build = ConcourseBuild(
+            team_name=team_name,
             target=target,
             pipeline=pipeline,
             job=job,
@@ -126,11 +133,12 @@ class ConcourseSearch():
 
         return result
     
-    def find(self, target, pipeline, job, build):
+    def find(self, team_name, target, pipeline, job, build):
         self.logger("Searching for build number in : {build}, {job}".format(build=build, job=job))
         base_url = self._get_base_url(target)
 
         concourse_build = ConcourseBuild(
+            team_name=team_name,
             target=target,
             pipeline=pipeline,
             job=job,
@@ -162,6 +170,7 @@ class ConcourseSearch():
         ))
 
         return self._fly.watch(
+            team_name=concourse_build.team_name(),
             target=concourse_build.target(),
             pipeline=concourse_build.pipeline(),
             job=concourse_build.job(),

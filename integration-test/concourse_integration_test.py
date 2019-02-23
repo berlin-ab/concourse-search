@@ -24,11 +24,17 @@ requests_session = requests.Session()
 
 
 class ConcourseIntegrationTest():
+    @classmethod
+    def setUpClass(self):
+        import shutil
+        shutil.rmtree("/tmp/.concourse-search")
+        
     def setUp(self):
         self.concourse_search = self.load_concourse_search()
         
     def test_it_returns_lines_from_a_concourse_build(self):
         lines = self.concourse_search.find(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -40,6 +46,7 @@ class ConcourseIntegrationTest():
         self.assertIn("real\t60m28.873s\r\n", line_messages)
 
         line = lines[0]
+        self.assertEqual(line.team_name(), "main")
         self.assertEqual(line.pipeline(), "gpdb_master")
         self.assertEqual(line.job(), "icw_planner_centos6")
         self.assertEqual(line.target(), "gpdb-prod")
@@ -47,6 +54,7 @@ class ConcourseIntegrationTest():
 
     def test_it_returns_line_information_after_caching(self):
         self.concourse_search.find(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -54,6 +62,7 @@ class ConcourseIntegrationTest():
         )
         
         lines = self.concourse_search.find(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -61,6 +70,7 @@ class ConcourseIntegrationTest():
         )
 
         line = lines[0]
+        self.assertEqual(line.team_name(), "main")
         self.assertEqual(line.pipeline(), "gpdb_master")
         self.assertEqual(line.job(), "icw_planner_centos6")
         self.assertEqual(line.target(), "gpdb-prod")
@@ -68,6 +78,7 @@ class ConcourseIntegrationTest():
         
     def test_it_stores_download_in_a_local_cache(self):
         lines = self.concourse_search.find(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -81,6 +92,7 @@ class ConcourseIntegrationTest():
 
     def test_it_returns_a_url_for_the_build_the_line_was_extracted_from(self):
         lines = self.concourse_search.find(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -93,6 +105,7 @@ class ConcourseIntegrationTest():
 
     def test_it_returns_all_builds(self):
         builds = self.concourse_search.find_builds(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",
@@ -104,6 +117,7 @@ class ConcourseIntegrationTest():
 
     def test_it_limits_the_number_of_returned_builds(self):
         builds = self.concourse_search.find_builds(
+            team_name="main",
             target="gpdb-prod",
             pipeline="gpdb_master",
             job="icw_planner_centos6",

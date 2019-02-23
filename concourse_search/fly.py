@@ -67,10 +67,11 @@ class FlyViaHttp():
             target=target_name
         ))
     
-    def watch(self, target, pipeline, job, build):
+    def watch(self, team_name, target, pipeline, job, build):
         fly_target = self.target_matching(target)
 
-        response = requests.get('{base_url}/api/v1/teams/main/pipelines/{pipeline}/jobs/{job}/builds/{build}'.format(
+        response = requests.get('{base_url}/api/v1/teams/{team_name}/pipelines/{pipeline}/jobs/{job}/builds/{build}'.format(
+            team_name=team_name,
             base_url=fly_target.url(),
             pipeline=pipeline,
             job=job,
@@ -132,7 +133,7 @@ class FlyViaCli():
 
         raise RuntimeError("could not find base url for target: {target}".format(target=target))
 
-    def watch(self, target, pipeline, job, build):
+    def watch(self, team_name, target, pipeline, job, build):
         full_command = [
             "fly",
             "--target", str(target),

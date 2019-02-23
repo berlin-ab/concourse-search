@@ -84,6 +84,7 @@ def display_build_as_row(build, stdout):
         
 def find_failures_runner(components, arguments):
     for failure in components.find_failures().find(
+        team_name=arguments.team_name(),
         target=arguments.target(),
         build=arguments.build(),
         pipeline=arguments.pipeline(),
@@ -96,6 +97,7 @@ def find_failures_runner(components, arguments):
         
 def failing_builds_runner(components, arguments):
     for build in components.failing_builds().find(
+        team_name=arguments.team_name(),
         target=arguments.target(),
         starting_build_number=arguments.starting_build(),
         pipeline=arguments.pipeline(),

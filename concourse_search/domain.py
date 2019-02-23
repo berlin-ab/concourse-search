@@ -3,13 +3,17 @@ def matches_search_criteria(search, line):
 
 
 class Line():
-    def __init__(self, message, target, pipeline, job, build, base_url):
+    def __init__(self, team_name, message, target, pipeline, job, build, base_url):
+        self._team_name = team_name
         self._message = message
         self._target = target
         self._pipeline = pipeline
         self._job = job
         self._build = build
         self._base_url = base_url
+
+    def team_name(self):
+        return self._team_name
 
     def message(self):
         return self._message
@@ -83,11 +87,11 @@ class FailingBuildsCommand():
     def __init__(self, concourse_search):
         self._concourse_search = concourse_search
     
-    def find(self, target, pipeline, job, starting_build_number, limit):
+    def find(self, team_name, target, pipeline, job, starting_build_number, limit):
         return [
             build
             for build
-            in self._concourse_search.find_builds(target, pipeline, job, starting_build_number, limit)
+            in self._concourse_search.find_builds(team_name, target, pipeline, job, starting_build_number, limit)
             if build.is_failing()
         ]
 
@@ -96,11 +100,11 @@ class FindFailuresCommand():
     def __init__(self, concourse_search):
         self._find_message_command = concourse_search
         
-    def find(self, target, build, pipeline, job, search, limit=100):
+    def find(self, team_name, target, build, pipeline, job, search, limit=100):
         failures_set = FailuresSet()
 
         while (build > 0 and limit > 0):
-            for line in self._search(target, pipeline, build, job, search):
+            for line in self._search(team_name, target, pipeline, build, job, search):
                 failures_set.add(line)
                 
             build = build - 1
@@ -108,8 +112,9 @@ class FindFailuresCommand():
 
         return failures_set.all()
 
-    def _search(self, target, pipeline, build, job, search):
+    def _search(self, team_name, target, pipeline, build, job, search):
         lines = self._find_message_command.find(
+            team_name=team_name,
             target=target,
             pipeline=pipeline,
             build=build,

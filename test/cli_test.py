@@ -167,6 +167,7 @@ class FindFailuresCliTest(unittest.TestCase):
 
 
 def make_line(build_number=123,
+              team_name="team-name",
               message="some message",
               target="some-target",
               pipeline="some-pipeline",
@@ -174,6 +175,7 @@ def make_line(build_number=123,
               base_url="http://example.com",
 ):
         return Line(
+            team_name=team_name,
             message=message,
             target=target,
             pipeline=pipeline,

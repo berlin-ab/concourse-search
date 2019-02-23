@@ -30,6 +30,9 @@ class FailingBuildsArguments():
     def name(self):
         return 'failing-builds'
 
+    def team_name(self):
+        return "main"
+
     def target(self):
         return self._arguments.target
 
@@ -58,6 +61,9 @@ class FindFailuresArguments():
         
     def name(self):
         return 'find-failures'
+
+    def team_name(self):
+        return "main"
 
     def target(self):
         return self._arguments.target

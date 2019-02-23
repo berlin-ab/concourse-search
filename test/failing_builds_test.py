@@ -20,7 +20,8 @@ class StubConcourseSearch():
     def stub(self, stubbed_return_values):
         self._stubbed_return_values = stubbed_return_values
 
-    def find_builds(self, target, pipeline, job, starting_build_number, limit):
+    def find_builds(self, team_name, target, pipeline, job, starting_build_number, limit):
+        self.used_team_name = team_name
         self.used_target = target
         self.used_pipeline = pipeline
         self.used_job = job
@@ -55,6 +56,7 @@ class FailingBuildsTest(unittest.TestCase):
         ])
         
         builds = self.failing_builds_command.find(
+            team_name='some-team-name',
             target='here',
             pipeline='soemthing',
             job='asdfas',
@@ -68,13 +70,15 @@ class FailingBuildsTest(unittest.TestCase):
 
     def test_it_receives_the_given_build_parameters(self):
         builds = self.failing_builds_command.find(
+            team_name='some-team-name',
             target="some-target",
             pipeline='some-pipeline',
             job='some-job',
             starting_build_number=123,
             limit=1000,
         )
-        
+
+        self.assertEqual('some-team-name', self.concourse_search.used_team_name)
         self.assertEqual('some-target', self.concourse_search.used_target)
         self.assertEqual('some-pipeline', self.concourse_search.used_pipeline)
         self.assertEqual('some-job', self.concourse_search.used_job)

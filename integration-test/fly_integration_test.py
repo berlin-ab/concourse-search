@@ -25,7 +25,7 @@ class FlyViaHttpIntegrationTest(unittest.TestCase):
     def test_it_returns_raw_concourse_build_output(self):
         fly = FlyViaHttp()
 
-        watch_response = fly.watch('gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 1551)
+        watch_response = fly.watch('main', 'gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 1551)
 
         lines = watch_response.lines()
         
@@ -34,7 +34,7 @@ class FlyViaHttpIntegrationTest(unittest.TestCase):
     def test_it_returns_failed_builds(self):
         fly = FlyViaHttp()
 
-        watch_response = fly.watch('gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 9)
+        watch_response = fly.watch('main', 'gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 9)
 
         self.assertFalse(watch_response.was_success())
         
@@ -42,4 +42,4 @@ class FlyViaHttpIntegrationTest(unittest.TestCase):
         fly = FlyViaHttp()
 
         with self.assertRaises(FlyBuildNotFound):
-            fly.watch('gpdb-prod', 'gpdb-master', 'some-nonsense', 1)
+            fly.watch('main', 'gpdb-prod', 'gpdb-master', 'some-nonsense', 1)
