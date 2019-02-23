@@ -24,20 +24,6 @@ def default_logger(message):
     pass
 
 
-class ConcourseBaseUrlFinder():
-    def __init__(self, fly):
-        self._cache = {}
-        self._fly = fly
-        
-    def find(self, target):
-        return self._cache.get(target, self._fetch(target))
-
-    def _fetch(self, target):
-        fly_target = self._fly.target_matching(target)
-        self._cache[target] = fly_target.url()
-        return fly_target.url()
-
-    
 class BuildResponse():
     def __init__(self, lines, was_success, logfile_path):
         self._lines = lines
@@ -96,14 +82,12 @@ class ConcourseBuild():
 
     
 class ConcourseSearch():
-    def __init__(self, fly, storage, logger=default_logger):
+    def __init__(self, fly, logger=default_logger):
         self.logger = logger
-        self.concourse_base_url_finder = ConcourseBaseUrlFinder(fly=fly)
-        self._storage = storage
         self._fly = fly
 
     def find_builds(self, team_name, target, pipeline, job, starting_build_number, limit=100):
-        base_url = self._get_base_url(target)
+        base_url = self._fly.get_base_url(target)
 
         concourse_build = ConcourseBuild(
             team_name=team_name,
@@ -117,7 +101,7 @@ class ConcourseSearch():
         result = []
         
         while (concourse_build.previous_build_exists() and limit > 0):
-            response = self._fetch_log_from_cache(concourse_build)
+            response = self._fly.fetch(concourse_build)
             
             result.append(
                 Build(
@@ -131,14 +115,13 @@ class ConcourseSearch():
             )
 
             concourse_build = concourse_build.previous_build()
-
             limit = limit - 1
 
         return result
     
     def find(self, team_name, target, pipeline, job, build):
         self.logger("Searching for build number in : {build}, {job}".format(build=build, job=job))
-        base_url = self._get_base_url(target)
+        base_url = self._fly.get_base_url(target)
 
         concourse_build = ConcourseBuild(
             team_name=team_name,
@@ -149,7 +132,7 @@ class ConcourseSearch():
             base_url=base_url
         )
 
-        lines = self._fetch_log_from_cache(concourse_build).lines()
+        lines = self._fly.fetch(concourse_build).lines()
 
         return transform_lines(
             lines=lines,
@@ -157,26 +140,4 @@ class ConcourseSearch():
             concourse_build=concourse_build,
         )
 
-    def _get_base_url(self, target):
-        return self.concourse_base_url_finder.find(target)
-    
-    def _fetch_log_from_cache(self, concourse_build):
-        if not self._storage.contains(concourse_build):
-            response = self._fetch_log_from_fly(concourse_build)
-            self._storage.store(concourse_build, response)
-
-        return self._storage.retrieve(concourse_build)
-
-    def _fetch_log_from_fly(self, concourse_build):
-        self.logger("Searching concourse for build number: {build}".format(
-            build=concourse_build.build_number()
-        ))
-
-        return self._fly.watch(
-            team_name=concourse_build.team_name(),
-            target=concourse_build.target(),
-            pipeline=concourse_build.pipeline(),
-            job=concourse_build.job(),
-            build=concourse_build.build_number(),
-        )
 

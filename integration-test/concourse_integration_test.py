@@ -9,6 +9,9 @@ from concourse_search.storage import (
     ConcourseSearchStorage
 )
 
+from concourse_search.fly import (
+    CachingFlyClient,
+)
 
 from concourse_search.fly_via_cli import (
     FlyViaCli,
@@ -129,8 +132,10 @@ class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
         self.storage = ConcourseSearchStorage("/tmp/.concourse-search-test")
         return ConcourseSearch(
-            fly=FlyViaHttp(session=requests_session),
-            storage=self.storage
+            CachingFlyClient(
+                fly=FlyViaHttp(session=requests_session),
+                storage=self.storage
+            )
         )
 
     
@@ -138,7 +143,9 @@ class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
         self.storage = ConcourseSearchStorage("/tmp/.concourse-search-test")
         return ConcourseSearch(
-            fly=FlyViaCli(),
-            storage=self.storage
+            CachingFlyClient(
+                fly=FlyViaCli(),
+                storage=self.storage
+            )
         )
 

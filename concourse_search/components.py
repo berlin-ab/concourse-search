@@ -17,6 +17,11 @@ from concourse_search.storage import (
 )
 
 
+from concourse_search.fly import (
+    CachingFlyClient,
+)
+
+
 from concourse_search.fly_via_cli import (
     FlyViaCli,
 )
@@ -114,11 +119,17 @@ class Components():
             log_directory="/tmp/.concourse-search"
         )
 
+    def caching_fly_client(self):
+        return CachingFlyClient(
+            storage=self.concourse_search_storage(),
+            fly=self.fly(),
+            logger=self.logger
+        )
+
     def concourse_search(self):
         return ConcourseSearch(
             logger=self.logger,
-            fly=self.fly(),
-            storage=self.concourse_search_storage()
+            fly=self.caching_fly_client(),
         )
 
     def find_failures(self):
