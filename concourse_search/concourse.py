@@ -91,6 +91,8 @@ class ConcourseBuild():
             base_url=self.base_url(),
         )
 
+    def previous_build_exists(self):
+        return self.build_number() > 0
     
 class ConcourseSearch():
     def __init__(self, fly, storage, logger=default_logger):
@@ -113,7 +115,7 @@ class ConcourseSearch():
         
         result = []
         
-        while (concourse_build.build_number() > 0 and limit > 0):
+        while (concourse_build.previous_build_exists() and limit > 0):
             response = self._fetch_log_from_cache(concourse_build)
             
             result.append(
