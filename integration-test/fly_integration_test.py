@@ -1,7 +1,7 @@
 import unittest
 
 
-from concourse_search.fly import (
+from concourse_search.fly_via_http import (
     FlyViaHttp,
     FlyBuildNotFound,
 )

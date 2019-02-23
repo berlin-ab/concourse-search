@@ -10,12 +10,12 @@ from concourse_search.storage import (
 )
 
 
-from concourse_search.fly import (
+from concourse_search.fly_via_cli import (
     FlyViaCli,
 )
 
 
-from concourse_search.fly import (
+from concourse_search.fly_via_http import (
     FlyViaHttp
 )
 
