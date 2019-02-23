@@ -140,4 +140,3 @@ class ConcourseSearch():
             concourse_build=concourse_build,
         )
 
-

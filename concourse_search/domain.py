@@ -98,7 +98,7 @@ class FailingBuildsCommand():
     
 class FindFailuresCommand():
     def __init__(self, concourse_search):
-        self._find_message_command = concourse_search
+        self._concourse_search = concourse_search
         
     def find(self, team_name, target, build, pipeline, job, search, limit=100):
         failures_set = FailuresSet()
@@ -113,7 +113,7 @@ class FindFailuresCommand():
         return failures_set.all()
 
     def _search(self, team_name, target, pipeline, build, job, search):
-        lines = self._find_message_command.find(
+        lines = self._concourse_search.find(
             team_name=team_name,
             target=target,
             pipeline=pipeline,
