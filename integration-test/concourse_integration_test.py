@@ -133,7 +133,7 @@ class ConcourseSearchViaFlyHttp(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
         return ConcourseSearch(
             fly=FlyViaHttp(session=requests_session),
-            storage=ConcourseSearchStorage()
+            storage=ConcourseSearchStorage("/tmp/.concourse-search-test")
         )
 
     
@@ -141,6 +141,6 @@ class ConcourseSearchViaFlyCli(ConcourseIntegrationTest, unittest.TestCase):
     def load_concourse_search(self):
         return ConcourseSearch(
             fly=FlyViaCli(),
-            storage=ConcourseSearchStorage()
+            storage=ConcourseSearchStorage("/tmp/.concourse-search-test")
         )
 

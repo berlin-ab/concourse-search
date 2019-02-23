@@ -110,7 +110,9 @@ class Components():
         return FlyViaHttp()
 
     def concourse_search_storage(self):
-        return ConcourseSearchStorage()
+        return ConcourseSearchStorage(
+            log_directory="/tmp/.concourse-search"
+        )
 
     def concourse_search(self):
         return ConcourseSearch(

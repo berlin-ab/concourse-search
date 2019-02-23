@@ -7,22 +7,25 @@ from concourse_search.concourse import (
 
 
 class ConcourseSearchStorage():
-    def __init__(self):
+    def __init__(self, log_directory):
+        self._log_directory = log_directory
         self.ensure_storage_exists()
         
     def ensure_storage_exists(self):
-        if not os.path.exists("/tmp/.concourse-search"):
-            os.makedirs("/tmp/.concourse-search")
+        if not os.path.exists(self._log_directory):
+            os.makedirs(self._log_directory)
 
     def logfile_path(self, concourse_build):
-        return "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}.log".format(
+        return "{log_directory}/{target}-{pipeline}-{job}-{build}.log".format(
+            log_directory=self._log_directory,
             target=concourse_build.target(),
             pipeline=concourse_build.pipeline().replace("_", "-"),
             job=concourse_build.job().replace("_", "-").replace("/", "-"),
             build=concourse_build.build_number(),
         )
     def success_file_path(self, concourse_build):
-        return "/tmp/.concourse-search/{target}-{pipeline}-{job}-{build}-was-success.log".format(
+        return "{log_directory}/{target}-{pipeline}-{job}-{build}-was-success.log".format(
+            log_directory=self._log_directory,
             target=concourse_build.target(),
             pipeline=concourse_build.pipeline().replace("_", "-"),
             job=concourse_build.job().replace("_", "-").replace("/", "-"),
@@ -62,4 +65,3 @@ class ConcourseSearchStorage():
             logfile_path=logfile_path,
         )
 
-    

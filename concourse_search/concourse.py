@@ -93,6 +93,7 @@ class ConcourseBuild():
 
     def previous_build_exists(self):
         return self.build_number() > 0
+
     
 class ConcourseSearch():
     def __init__(self, fly, storage, logger=default_logger):
