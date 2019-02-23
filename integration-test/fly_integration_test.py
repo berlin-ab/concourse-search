@@ -6,24 +6,28 @@ from concourse_search.fly_via_http import (
     FlyBuildNotFound,
 )
 
+from concourse_search.fly_via_cli import (
+    FlyViaCli,
+)
 
-class FlyViaHttpIntegrationTest(unittest.TestCase):
+
+class FlyIntegrationBaseTest():
     def test_it_can_load_targets(self):
-        fly = FlyViaHttp()
+        fly = self.fly_client()
 
         urls = [target.url() for target in fly.targets()]
         
         self.assertIn('https://dev.ci.gpdb.pivotal.io', urls)
 
     def test_it_can_find_a_matching_target(self):
-        fly = FlyViaHttp()
+        fly = self.fly_client()
 
         target = fly.target_matching('gpdb-dev')
                 
         self.assertEqual('https://dev.ci.gpdb.pivotal.io', target.url())
 
     def test_it_returns_raw_concourse_build_output(self):
-        fly = FlyViaHttp()
+        fly = self.fly_client()
 
         watch_response = fly.watch('main', 'gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 1551)
 
@@ -32,11 +36,21 @@ class FlyViaHttpIntegrationTest(unittest.TestCase):
         self.assertIn('checking for stdint.h... ', lines)
 
     def test_it_returns_failed_builds(self):
-        fly = FlyViaHttp()
+        fly = self.fly_client()
 
         watch_response = fly.watch('main', 'gpdb-prod', 'gpdb_master', 'icw_planner_centos6', 9)
 
         self.assertFalse(watch_response.was_success())
+        
+
+class FlyViaCliIntegrationTest(FlyIntegrationBaseTest, unittest.TestCase):
+    def fly_client(self):
+        return FlyViaCli()
+    
+
+class FlyViaHttpIntegrationTest(FlyIntegrationBaseTest, unittest.TestCase):
+    def fly_client(self):
+        return FlyViaHttp()
         
     def test_it_throws_an_exception_when_asking_for_a_job_that_does_not_exist(self):
         fly = FlyViaHttp()

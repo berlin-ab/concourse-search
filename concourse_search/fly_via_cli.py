@@ -11,7 +11,7 @@ from concourse_search.fly import (
 class FlyViaCli():
     def targets(self):
         return [
-            line.decode('utf-8')
+            self._parse_target_line(line, '')
             for line
             in subprocess.check_output(["fly", "targets"]).splitlines(True)
         ]
